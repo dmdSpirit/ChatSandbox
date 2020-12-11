@@ -1,0 +1,20 @@
+﻿v1 11.12.2020
+
++ Floor plane
++ Unit
+    + Unit movement
+    - Draw unit path
+- Building
+- Resource Node
+- Unit task
+    + Move to
+    - Find resource
+    - Gather resource
+- Teams
+- Resources UI
+- Session timer
+    - Time to join
+- Chat integration
+    - !join
+    - !tree
+    - !stone
