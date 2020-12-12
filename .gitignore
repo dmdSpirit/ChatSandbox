@@ -10,6 +10,7 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 
+
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
 
@@ -58,3 +59,9 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+Assets/Docs/Credentials.cs
+Assets/Docs/Credentials.cs.meta
+.idea/.idea.ChatSandbox/.idea/workspace.xml
+.idea/.idea.ChatSandbox/.idea/vcs.xml
+.idea/.idea.ChatSandbox/.idea/indexLayout.xml
+.idea/.idea.ChatSandbox/.idea/contentModel.xml

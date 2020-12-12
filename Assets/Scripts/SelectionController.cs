@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace dmdspirit
 {
@@ -10,6 +11,8 @@ namespace dmdspirit
         {
             InputController.Instance.OnUnitSelected += UnitSelectedHandler;
             InputController.Instance.OnMoveCommand += MoveCommandHandler;
+            InputController.Instance.OnGatherCommand += GatherCommandHandler;
+            InputController.Instance.OnFindAndGatherCommand += FindAndGatherCommandHandler;
         }
 
         private void UnitSelectedHandler(Unit unit)
@@ -23,6 +26,18 @@ namespace dmdspirit
         {
             if (currentUnit == null) return;
             currentUnit.MoveTo(destination);
+        }
+
+        private void GatherCommandHandler(Resource resource)
+        {
+            if (currentUnit == null) return;
+            currentUnit.GatherResource(resource);
+        }
+
+        private void FindAndGatherCommandHandler(ResourceType type)
+        {
+            if (currentUnit == null) return;
+            currentUnit.FindAndGatherResource(type);
         }
     }
 }

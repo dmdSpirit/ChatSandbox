@@ -3,18 +3,30 @@
 + Floor plane
 + Unit
     + Unit movement
-    - Draw unit path
-- Building
-- Resource Node
+    + Draw unit path
++ Building
++ Resource Node
 - Unit task
     + Move to
-    - Find resource
-    - Gather resource
-- Teams
-- Resources UI
-- Session timer
-    - Time to join
+    + Gather resource
+    + Find resource
++ Teams
++UI
+    + Resources
+    + Units
 - Chat integration
+    + Parse commands from chat
     - !join
     - !tree
     - !stone
+- Game session
+    - Win condition - gather more resources.
+    - Session timer
+    - Time to join
+    
+-----------------------------    
+v2 12.12.2020    
+- Unit name plates for users
+- Unit behaviour
+    - Wondering around on idle state
+    - Decision making

@@ -9,8 +9,10 @@ namespace dmdspirit
     {
         public event Action<Unit> OnUnitSelected;
         public event Action<Vector3> OnMoveCommand;
+        public event Action<Resource> OnGatherCommand;
+        public event Action<ResourceType> OnFindAndGatherCommand;
 
-        [SerializeField] private LayerMask floorMask;
+        [SerializeField] private LayerMask floorAndResourceMask;
 
         private InputActions inputActions;
 
@@ -19,6 +21,8 @@ namespace dmdspirit
             inputActions = new InputActions();
             inputActions.@base.MouseLeftClick.performed += LeftClick;
             inputActions.@base.MouseRightClick.performed += RightClick;
+            inputActions.@base.GatherStone.performed += (InputAction.CallbackContext cx) => OnFindAndGatherCommand?.Invoke(ResourceType.Stone);
+            inputActions.@base.GatherTree.performed += (InputAction.CallbackContext cx) => OnFindAndGatherCommand?.Invoke(ResourceType.Tree);
         }
 
         private void OnEnable() => inputActions?.Enable();
@@ -44,8 +48,14 @@ namespace dmdspirit
             var position = inputActions.@base.MousePosition.ReadValue<Vector2>();
             if (position.x > Screen.width || position.y > Screen.height || position.x < 0 || position.y < 0) return;
             var ray = Camera.main.ScreenPointToRay(position);
-            if (Physics.Raycast(ray, out var hit, 1000, floorMask))
-                OnMoveCommand?.Invoke(hit.point);
+            if (Physics.Raycast(ray, out var hit, 1000, floorAndResourceMask))
+            {
+                var resource = hit.collider.GetComponent<Resource>();
+                if (resource == null)
+                    OnMoveCommand?.Invoke(hit.point);
+                else
+                    OnGatherCommand?.Invoke(resource);
+            }
         }
     }
 }

@@ -43,6 +43,22 @@ namespace dmdspirit
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Gather Stone"",
+                    ""type"": ""Button"",
+                    ""id"": ""d6ac5c26-fe62-4255-a665-20904a9efdb5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Gather Tree"",
+                    ""type"": ""Button"",
+                    ""id"": ""c544036c-8481-41c1-a9b4-8435b539b515"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -78,6 +94,28 @@ namespace dmdspirit
                     ""action"": ""Mouse Right Click"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c1bf4fab-c2fc-4bde-b1cb-f35f94d1aa5a"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Gather Stone"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""905cf252-b161-45fa-9b0f-b313aab297a9"",
+                    ""path"": ""<Keyboard>/t"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Gather Tree"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -101,6 +139,8 @@ namespace dmdspirit
             m_base_MouseLeftClick = m_base.FindAction("Mouse Left Click", throwIfNotFound: true);
             m_base_MousePosition = m_base.FindAction("Mouse Position", throwIfNotFound: true);
             m_base_MouseRightClick = m_base.FindAction("Mouse Right Click", throwIfNotFound: true);
+            m_base_GatherStone = m_base.FindAction("Gather Stone", throwIfNotFound: true);
+            m_base_GatherTree = m_base.FindAction("Gather Tree", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -153,6 +193,8 @@ namespace dmdspirit
         private readonly InputAction m_base_MouseLeftClick;
         private readonly InputAction m_base_MousePosition;
         private readonly InputAction m_base_MouseRightClick;
+        private readonly InputAction m_base_GatherStone;
+        private readonly InputAction m_base_GatherTree;
         public struct BaseActions
         {
             private @InputActions m_Wrapper;
@@ -160,6 +202,8 @@ namespace dmdspirit
             public InputAction @MouseLeftClick => m_Wrapper.m_base_MouseLeftClick;
             public InputAction @MousePosition => m_Wrapper.m_base_MousePosition;
             public InputAction @MouseRightClick => m_Wrapper.m_base_MouseRightClick;
+            public InputAction @GatherStone => m_Wrapper.m_base_GatherStone;
+            public InputAction @GatherTree => m_Wrapper.m_base_GatherTree;
             public InputActionMap Get() { return m_Wrapper.m_base; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -178,6 +222,12 @@ namespace dmdspirit
                     @MouseRightClick.started -= m_Wrapper.m_BaseActionsCallbackInterface.OnMouseRightClick;
                     @MouseRightClick.performed -= m_Wrapper.m_BaseActionsCallbackInterface.OnMouseRightClick;
                     @MouseRightClick.canceled -= m_Wrapper.m_BaseActionsCallbackInterface.OnMouseRightClick;
+                    @GatherStone.started -= m_Wrapper.m_BaseActionsCallbackInterface.OnGatherStone;
+                    @GatherStone.performed -= m_Wrapper.m_BaseActionsCallbackInterface.OnGatherStone;
+                    @GatherStone.canceled -= m_Wrapper.m_BaseActionsCallbackInterface.OnGatherStone;
+                    @GatherTree.started -= m_Wrapper.m_BaseActionsCallbackInterface.OnGatherTree;
+                    @GatherTree.performed -= m_Wrapper.m_BaseActionsCallbackInterface.OnGatherTree;
+                    @GatherTree.canceled -= m_Wrapper.m_BaseActionsCallbackInterface.OnGatherTree;
                 }
                 m_Wrapper.m_BaseActionsCallbackInterface = instance;
                 if (instance != null)
@@ -191,6 +241,12 @@ namespace dmdspirit
                     @MouseRightClick.started += instance.OnMouseRightClick;
                     @MouseRightClick.performed += instance.OnMouseRightClick;
                     @MouseRightClick.canceled += instance.OnMouseRightClick;
+                    @GatherStone.started += instance.OnGatherStone;
+                    @GatherStone.performed += instance.OnGatherStone;
+                    @GatherStone.canceled += instance.OnGatherStone;
+                    @GatherTree.started += instance.OnGatherTree;
+                    @GatherTree.performed += instance.OnGatherTree;
+                    @GatherTree.canceled += instance.OnGatherTree;
                 }
             }
         }
@@ -209,6 +265,8 @@ namespace dmdspirit
             void OnMouseLeftClick(InputAction.CallbackContext context);
             void OnMousePosition(InputAction.CallbackContext context);
             void OnMouseRightClick(InputAction.CallbackContext context);
+            void OnGatherStone(InputAction.CallbackContext context);
+            void OnGatherTree(InputAction.CallbackContext context);
         }
     }
 }
