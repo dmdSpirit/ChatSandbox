@@ -8,9 +8,9 @@ namespace dmdspirit
 {
     public class TeamUI : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI[] unitNames;
-        [SerializeField] private TextMeshProUGUI stoneValue;
-        [SerializeField] private TextMeshProUGUI woodValue;
+        [SerializeField] private TMP_Text[] unitNames;
+        [SerializeField] private TMP_Text stoneValue;
+        [SerializeField] private TMP_Text woodValue;
         [SerializeField] private Image background;
 
         private Team team;
@@ -52,5 +52,7 @@ namespace dmdspirit
                     break;
             }
         }
+
+        public void UpdateUnitName(int nameId, string newName) => unitNames[nameId].text = newName;
     }
 }

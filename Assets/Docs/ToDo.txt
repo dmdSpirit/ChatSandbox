@@ -1,4 +1,36 @@
-﻿v1 11.12.2020
+﻿v2 14.12.2020  
++ Join current session if there are any bots left.
++ Change team on join  
++ Unit name plates for users
+
+- Unit behaviour
+    - Decision making
+        - Resource gathering loop
+        - Attack?
+    - Wondering around on idle state
+- Map grid
+- Combat
+- Unit respawn
+- Building
+    - Tower
+    - Barracks
+- Jobs
+- Show resource icon if unit is carrying something
+- Show current task icon or visualize path
+
+------------------------------
+Future:
+- Figure a way to remove units collision with each other
+- Map generation
+- User database
+    - user id consistency
+
+
+------------------------------
+------------------------------
+DONE:
+
+v1 11.12.2020
 
 + Floor plane
 + Unit
@@ -14,19 +46,14 @@
 +UI
     + Resources
     + Units
-- Chat integration
++ Chat integration
     + Parse commands from chat
-    - !join
-    - !tree
-    - !stone
+    + !help
 - Game session
-    - Win condition - gather more resources.
-    - Session timer
-    - Time to join
-    
------------------------------    
-v2 12.12.2020    
-- Unit name plates for users
-- Unit behaviour
-    - Wondering around on idle state
-    - Decision making
+    + Time to join
+    + !join
+    + Session timer
+    + Win condition - gather more resources.
++ Unit control
+    + !wood
+    + !stone

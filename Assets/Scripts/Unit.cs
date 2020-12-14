@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -29,10 +30,13 @@ namespace dmdspirit
         // [SerializeField] private float moveStoppingDistance = 0.1f;
         [SerializeField] private LayerMask resourceLayer = default;
         [SerializeField] private float searchSphereIncrementRadius = 5f;
+        [SerializeField] private TMP_Text nameplate;
 
         // IMPROVE: Ugly.
         public BaseBuilding baseBuilding;
         public Team team;
+
+        public string player;
 
         private NavMeshAgent navAgent;
         private UnitState state;
@@ -44,6 +48,7 @@ namespace dmdspirit
         private void Awake()
         {
             navAgent = GetComponent<NavMeshAgent>();
+            nameplate.text = string.Empty;
         }
 
         private void Update()
@@ -89,6 +94,13 @@ namespace dmdspirit
             }
 
             DrawPath();
+        }
+
+        public void SetName(string unitName)
+        {
+            name = unitName;
+            nameplate.text = unitName;
+            player = unitName;
         }
 
         public void SetUnitColor(Color color)

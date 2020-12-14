@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -8,8 +10,29 @@ using UnityEngine;
 
 namespace dmdspirit
 {
-    public class ChatParser : MonoBehaviour
+    public class ChatParser : MonoSingleton<ChatParser>
     {
+        private enum ChatCommands
+        {
+            None,
+            Join,
+            Wood,
+            Stone,
+            Help
+        }
+
+        private struct Command
+        {
+            public string user;
+            public ChatCommands commandType;
+            public TeamTag teamTag;
+        }
+
+        public event Action<string, TeamTag> OnUserJoin;
+
+        // FIXME: Should be separate entity, parsing all commands using ingame logic.
+        public event Action<string, ResourceType> OnGatherCommand;
+
         private struct Message
         {
             public string userName;
@@ -17,9 +40,11 @@ namespace dmdspirit
         }
 
         private TwitchClient client;
+        private List<Command> commandList;
 
         private void Start()
         {
+            commandList = new List<Command>();
             var credentials = new ConnectionCredentials(Credentials.bot_user_name, Credentials.bot_access_token);
             var clientOptions = new ClientOptions
             {
@@ -36,9 +61,52 @@ namespace dmdspirit
             client.Connect();
         }
 
+        private void Update()
+        {
+            foreach (var command in commandList)
+            {
+                switch (command.commandType)
+                {
+                    case ChatCommands.Join:
+                        OnUserJoin?.Invoke(command.user, command.teamTag);
+                        break;
+                    case ChatCommands.Wood:
+                    case ChatCommands.Stone:
+                        var resourceType = command.commandType == ChatCommands.Stone ? ResourceType.Stone : ResourceType.Tree;
+                        OnGatherCommand?.Invoke(command.user, resourceType);
+                        break;
+                }
+            }
+
+            commandList.Clear();
+        }
+
         private void ChatCommandReceivedHandler(object sender, OnChatCommandReceivedArgs e)
         {
             Debug.Log($"Command: ({e.Command.CommandText}) and args: ({string.Join(",", e.Command.ArgumentsAsList)})");
+            // FIXME: Should this return "error message" to chat?
+            if (Enum.TryParse<ChatCommands>(e.Command.CommandText, true, out var command) == false) return;
+            switch (command)
+            {
+                case ChatCommands.Join:
+                    // FIXME: Ugly.
+                    if (e.Command.ArgumentsAsList.Count > 0 && Enum.TryParse<TeamTag>(e.Command.ArgumentsAsList[0].ToString(), true, out var teamTag))
+                        commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Join, teamTag = teamTag});
+                    else
+                        commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Join, teamTag = TeamTag.None});
+                    return;
+                case ChatCommands.Wood:
+                    commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Wood});
+                    break;
+                case ChatCommands.Stone:
+                    commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Stone});
+                    break;
+                case ChatCommands.Help:
+                    client.SendMessage(e.Command.ChatMessage.Channel, $"List of commands: !join, !stone, !tree, !help");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private void NoPermissionErrorHandler(object sender, EventArgs e)
