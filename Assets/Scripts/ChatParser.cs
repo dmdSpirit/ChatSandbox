@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -41,6 +42,8 @@ namespace dmdspirit
 
         private TwitchClient client;
         private List<Command> commandList;
+
+        private List<ChatCommands> excludedCommands = new List<ChatCommands>() {ChatCommands.None};
 
         private void Start()
         {
@@ -102,12 +105,14 @@ namespace dmdspirit
                     commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Stone});
                     break;
                 case ChatCommands.Help:
-                    client.SendMessage(e.Command.ChatMessage.Channel, $"List of commands: !join, !stone, !tree, !help");
+                    client.SendMessage(e.Command.ChatMessage.Channel, $"List of commands: {GetCommandList()}");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        private string GetCommandList() => string.Join(", ", ((from ChatCommands command in Enum.GetValues(typeof(ChatCommands)) where excludedCommands.Contains(command) == false select string.Concat("!", command.ToString().ToLower()))));
 
         private void NoPermissionErrorHandler(object sender, EventArgs e)
         {

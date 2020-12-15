@@ -13,9 +13,8 @@ namespace dmdspirit
         public event Action<Unit> OnUnitAdded;
 
         public Color teamColor = Color.green;
+        public BaseBuilding baseBuilding = default;
 
-        [SerializeField] private BaseBuilding baseBuilding = default;
-        private int maxUnitCount = 3;
         [SerializeField] private float spawnCooldown = 1f;
         [SerializeField] private Unit unitPrefab = default;
         [SerializeField] private string teamName = "team";
@@ -27,6 +26,8 @@ namespace dmdspirit
         private List<Unit> units;
         private List<string> players;
         private List<int> botUnits;
+
+        private int maxUnitCount = 3;
 
         private void Start()
         {
@@ -76,20 +77,20 @@ namespace dmdspirit
             {
                 var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
                 units.Add(unit);
-                unit.SetUnitColor(teamColor);
-                unit.baseBuilding = baseBuilding;
-                unit.team = this;
-                if (i < players.Count)
+                var isPlayerUnit = i < players.Count;
+                string unitName;
+                if (isPlayerUnit)
                 {
-                    unit.SetName(players[i]);
+                    unitName = players[i];
                     GameController.Instance.PlayerUnitCreated(players[i], unit);
                 }
                 else
                 {
-                    unit.name = string.Concat(teamName, " ", units.Count);
+                    unitName = string.Concat(teamName, " ", units.Count);
                     botUnits.Add(i);
                 }
 
+                unit.Initialize(this, unitName, teamColor, isPlayerUnit);
                 OnUnitAdded?.Invoke(unit);
                 yield return new WaitForSeconds(spawnCooldown);
             }
@@ -100,8 +101,8 @@ namespace dmdspirit
             if (botUnits.Count == 0) return null;
             var botId = botUnits[0];
             botUnits.Remove(botUnits[0]);
-            
-            units[botId].SetName(userName);
+
+            units[botId].SwapBotForPlayer(userName);
             ui.UpdateUnitName(botId, userName);
             return units[botId];
         }

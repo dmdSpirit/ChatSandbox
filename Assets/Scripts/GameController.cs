@@ -49,8 +49,7 @@ namespace dmdspirit
 
         private void GatherCommandHandler(string userName, ResourceType resourceType)
         {
-            if (playerUnits.ContainsKey(userName) == false) return;
-            playerUnits[userName].FindAndGatherResource(resourceType);
+            playerUnits[userName].GatherResource(resourceType);
         }
 
         private void UserJoinHandler(string userName, TeamTag teamTag)
@@ -85,7 +84,6 @@ namespace dmdspirit
                 {
                     var rnd = Random.Range(0, 2);
                     teamTag = rnd == 1 ? TeamTag.green : TeamTag.red;
-                    Debug.Log($"Random: {rnd}, Team: {teamTag.ToString()}");
                 }
                 else
                     teamTag = TeamTag.green;

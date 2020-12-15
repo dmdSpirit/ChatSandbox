@@ -20,6 +20,8 @@ namespace dmdspirit
 
     public class Resource : MonoBehaviour
     {
+        public event Action<Resource> OnResourceDepleted;
+
         public ResourceValue value;
 
         private void Start()
@@ -29,7 +31,11 @@ namespace dmdspirit
 
         private void Update()
         {
-            if(value.value<=0) DestroyNode();
+            if (value.value <= 0)
+            {
+                OnResourceDepleted?.Invoke(this);
+                DestroyNode();
+            }
         }
 
         public float GatherResource(float desiredValue)

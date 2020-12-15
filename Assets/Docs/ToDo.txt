@@ -2,28 +2,29 @@
 + Join current session if there are any bots left.
 + Change team on join  
 + Unit name plates for users
-
-- Unit behaviour
-    - Decision making
-        - Resource gathering loop
-        - Attack?
-    - Wondering around on idle state
++ Unit behaviour
+    + Behaviour state machine
+    + Wondering around on idle state
+    + Resource gathering loop
+    
 - Map grid
-- Combat
-- Unit respawn
 - Building
     - Tower
     - Barracks
+- Combat
 - Jobs
+- Unit respawn
 - Show resource icon if unit is carrying something
 - Show current task icon or visualize path
 
 ------------------------------
 Future:
+- BAN LIST
 - Figure a way to remove units collision with each other
 - Map generation
 - User database
     - user id consistency
+- !kill userName
 
 
 ------------------------------

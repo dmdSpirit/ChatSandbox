@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1473624264715507050}
   - component: {fileID: 2946590785475601882}
+  - component: {fileID: 1114245741968762436}
   - component: {fileID: 6549615131330095838}
   - component: {fileID: 4449047809546455985}
   m_Layer: 0
@@ -48,18 +49,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   renderer: {fileID: 2545693539234771700}
-  gatheringDistance: 1
-  gatheringCooldown: 1
-  gatheringAmount: 1
-  maxCarryingCapacity: 10
-  resourceLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  searchSphereIncrementRadius: 5
   nameplate: {fileID: 3765713721165688694}
-  baseBuilding: {fileID: 0}
-  team: {fileID: 0}
-  player: 
+  maxCarryingCapacity: 10
+  carriedResource:
+    type: 0
+    value: 0
+--- !u!114 &1114245741968762436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473624264715507053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ffaab1519ecbd94596f84feb48d47b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleWalkRadius: 5
+  gatheringDistance: 1
+  gatheringAmount: 1
+  gatheringCooldown: 2
 --- !u!135 &6549615131330095838
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -380,10 +390,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 41.35
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0

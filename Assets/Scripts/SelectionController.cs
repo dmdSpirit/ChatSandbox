@@ -24,20 +24,14 @@ namespace dmdspirit
 
         private void MoveCommandHandler(Vector3 destination)
         {
-            if (currentUnit == null) return;
-            currentUnit.MoveTo(destination);
         }
 
         private void GatherCommandHandler(Resource resource)
         {
-            if (currentUnit == null) return;
-            currentUnit.GatherResource(resource);
         }
 
         private void FindAndGatherCommandHandler(ResourceType type)
         {
-            if (currentUnit == null) return;
-            currentUnit.FindAndGatherResource(type);
         }
     }
 }
