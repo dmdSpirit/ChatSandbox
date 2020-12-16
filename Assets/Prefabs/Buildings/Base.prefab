@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 514277451926342287}
-  - component: {fileID: 2333162825542778866}
   - component: {fileID: 5929435588878218325}
+  - component: {fileID: 5704760418827521047}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -35,19 +35,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &2333162825542778866
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 514277451926342286}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5929435588878218325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,10 +47,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39016493ec7e64a43ab20ec768c05f45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entrance: {fileID: 35894665887938390}
   renderers:
   - {fileID: 514277452096163685}
   - {fileID: 8077351721776046968}
+  cost:
+    stone: 0
+    wood: 0
+  entrance: {fileID: 35894665887938390}
+--- !u!208 &5704760418827521047
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 514277451926342286}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.5, y: 1, z: 1.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 1, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &514277452096163686
 GameObject:
   m_ObjectHideFlags: 0
@@ -201,7 +207,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3895902092838441151}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 1.448}
+  m_LocalPosition: {x: 0, y: 0.5, z: 1.448}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 514277451926342287}

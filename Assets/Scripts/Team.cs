@@ -9,7 +9,7 @@ namespace dmdspirit
     public class Team : MonoBehaviour
     {
         public TeamTag teamTag;
-        public event Action<ResourceType, int> OnResourceChange;
+        public event Action OnResourceChange;
         public event Action<Unit> OnUnitAdded;
 
         public Color teamColor = Color.green;
@@ -20,12 +20,12 @@ namespace dmdspirit
         [SerializeField] private string teamName = "team";
         [SerializeField] private TeamUI ui;
 
-        public float Wood { get; protected set; }
-        public float Stone { get; protected set; }
+        public ResourceCost storedResources;
 
         private List<Unit> units;
         private List<string> players;
         private List<int> botUnits;
+        private List<Building> buildings;
 
         private int maxUnitCount = 3;
 
@@ -41,32 +41,33 @@ namespace dmdspirit
         public void Initialize(List<string> players, int maxUnitCount)
         {
             botUnits = new List<int>();
+            buildings = new List<Building>();
             this.players = players;
             this.maxUnitCount = maxUnitCount;
             StartCoroutine(SpawnUnits());
             ui.gameObject.SetActive(true);
+            storedResources = new ResourceCost();
             ui.Initialize(this, 0, 0);
         }
 
         public void AddResource(ResourceValue value)
         {
             Debug.Log($"Resource added to {teamName} team: ({value.type}, {value.value}).");
-            // FIXME: UGLY!
-            switch (value.type)
-            {
-                case ResourceType.None:
-                    return;
-                case ResourceType.Tree:
-                    Wood += value.value;
-                    OnResourceChange?.Invoke(ResourceType.Tree, (int) Wood);
-                    break;
-                case ResourceType.Stone:
-                    Stone += value.value;
-                    OnResourceChange?.Invoke(ResourceType.Stone, (int) Stone);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            storedResources.AddResources(value);
+            OnResourceChange?.Invoke();
+        }
+
+        public void SpendResources(ResourceCost cost)
+        {
+            storedResources.SpendResource(cost);
+            OnResourceChange?.Invoke();
+        }
+
+        public void AddBuilding(BuildingSite buildingSite)
+        {
+            var building = buildingSite.Building;
+            buildings.Add(building);
+            buildingSite.DestroySite();
         }
 
         private IEnumerator SpawnUnits()

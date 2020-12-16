@@ -9,9 +9,12 @@ namespace dmdspirit
     public class UnitBehaviour : MonoBehaviour
     {
         [SerializeField] private float idleWalkRadius = 5f;
-        [SerializeField] private float gatheringDistance = 1f;
-        [SerializeField] private float gatheringAmount = 1f;
-        [SerializeField] private float gatheringCooldown = 2f;
+
+        public float gatheringDistance = 1f;
+        public float gatheringAmount = 1f;
+        public float gatheringCooldown = 2f;
+        public float buildingRadius = 3f;
+        public float buildingSpeed = 1f;
 
         private Unit unit;
         private Stack<State> stateStack;
@@ -65,14 +68,25 @@ namespace dmdspirit
 
         public void GatherResource(ResourceType resourceType)
         {
+            StopCurrentState();
+            var gatherState = new GatherState(agent, gatheringDistance, gatheringCooldown, gatheringAmount, resourceType);
+            PushNewStateHandler(gatherState);
+        }
+
+        public void Build(BuildingType buildingType, MapPosition mapPosition)
+        {
+            StopCurrentState();
+            var buildState = new BuildState(agent, buildingType, Map.Instance.GetTile(mapPosition), buildingRadius, buildingSpeed);
+            PushNewStateHandler(buildState);
+        }
+
+        private void StopCurrentState()
+        {
             if (stateStack.Count > 0)
             {
                 var currentState = stateStack.Peek();
                 currentState.StopState();
             }
-
-            var gatherState = new GatherState(agent, gatheringDistance, gatheringCooldown, gatheringAmount, resourceType);
-            PushNewStateHandler(gatherState);
         }
     }
 }

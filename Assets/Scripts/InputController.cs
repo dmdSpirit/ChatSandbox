@@ -22,7 +22,7 @@ namespace dmdspirit
             inputActions.@base.MouseLeftClick.performed += LeftClick;
             inputActions.@base.MouseRightClick.performed += RightClick;
             inputActions.@base.GatherStone.performed += (InputAction.CallbackContext cx) => OnFindAndGatherCommand?.Invoke(ResourceType.Stone);
-            inputActions.@base.GatherTree.performed += (InputAction.CallbackContext cx) => OnFindAndGatherCommand?.Invoke(ResourceType.Tree);
+            inputActions.@base.GatherTree.performed += (InputAction.CallbackContext cx) => OnFindAndGatherCommand?.Invoke(ResourceType.Wood);
         }
 
         private void OnEnable() => inputActions?.Enable();

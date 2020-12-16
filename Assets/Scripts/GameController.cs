@@ -31,6 +31,8 @@ namespace dmdspirit
         private Coroutine joinTimerCoroutine;
         private bool isSessionRunning = false;
 
+        public List<BuildingType> canBeBuild = new List<BuildingType>() {BuildingType.Tower};
+
         public void StartGame()
         {
             redTeamPlayers = new List<string>();
@@ -39,16 +41,26 @@ namespace dmdspirit
             // Start gathering users who want to !join.
             ChatParser.Instance.OnUserJoin += UserJoinHandler;
             ChatParser.Instance.OnGatherCommand += GatherCommandHandler;
+            ChatParser.Instance.OnBuildCommand += BuildCommandHandler;
             joinTimerCoroutine = StartCoroutine(JoinTimer());
             sessionTimerUI.Hide();
             resultsUI.Hide();
             redTeam.HideUI();
             greenTeam.HideUI();
             isSessionRunning = false;
+            Map.Instance.StartGame();
         }
+
+        private void BuildCommandHandler(string userName, BuildingType buildingType, MapPosition mapPosition)
+        {
+            if (playerUnits.ContainsKey(userName) == false) return;
+            playerUnits[userName].Build(buildingType, mapPosition);
+        }
+
 
         private void GatherCommandHandler(string userName, ResourceType resourceType)
         {
+            if (playerUnits.ContainsKey(userName) == false) return;
             playerUnits[userName].GatherResource(resourceType);
         }
 
@@ -116,7 +128,7 @@ namespace dmdspirit
         private void ShowResults()
         {
             Debug.Log("Game Ended. Show results.");
-            resultsUI.Show((int) greenTeam.Stone, (int) greenTeam.Wood, (int) redTeam.Stone, (int) redTeam.Wood);
+            resultsUI.Show(greenTeam.storedResources.stone, greenTeam.storedResources.wood, redTeam.storedResources.stone, redTeam.storedResources.wood);
         }
 
         private IEnumerator JoinTimer()

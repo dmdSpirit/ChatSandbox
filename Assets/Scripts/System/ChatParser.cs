@@ -19,6 +19,7 @@ namespace dmdspirit
             Join,
             Wood,
             Stone,
+            Build,
             Help
         }
 
@@ -27,12 +28,15 @@ namespace dmdspirit
             public string user;
             public ChatCommands commandType;
             public TeamTag teamTag;
+            public BuildingType buildingType;
+            public MapPosition position;
         }
 
         public event Action<string, TeamTag> OnUserJoin;
 
         // FIXME: Should be separate entity, parsing all commands using ingame logic.
         public event Action<string, ResourceType> OnGatherCommand;
+        public event Action<string, BuildingType, MapPosition> OnBuildCommand;
 
         private struct Message
         {
@@ -75,8 +79,12 @@ namespace dmdspirit
                         break;
                     case ChatCommands.Wood:
                     case ChatCommands.Stone:
-                        var resourceType = command.commandType == ChatCommands.Stone ? ResourceType.Stone : ResourceType.Tree;
+                        var resourceType = command.commandType == ChatCommands.Stone ? ResourceType.Stone : ResourceType.Wood;
                         OnGatherCommand?.Invoke(command.user, resourceType);
+                        break;
+                    case ChatCommands.Build:
+                        if (Map.Instance.CheckPosition(command.position))
+                            OnBuildCommand?.Invoke(command.user, command.buildingType, command.position);
                         break;
                 }
             }
@@ -106,6 +114,13 @@ namespace dmdspirit
                     break;
                 case ChatCommands.Help:
                     client.SendMessage(e.Command.ChatMessage.Channel, $"List of commands: {GetCommandList()}");
+                    break;
+                case ChatCommands.Build:
+                    var args = e.Command.ArgumentsAsList;
+                    if (args.Count == 2 &&
+                        MapPosition.TryParse(args[0], out var mapPosition) &&
+                        Enum.TryParse<BuildingType>(args[1], true, out var buildingType))
+                        commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Build, buildingType = buildingType, position = mapPosition});
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

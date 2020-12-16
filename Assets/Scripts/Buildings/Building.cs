@@ -2,12 +2,14 @@
 
 namespace dmdspirit
 {
-    public class BaseBuilding : MonoBehaviour
+    public class Building : MonoBehaviour
     {
-        public Transform entrance;
-
         [SerializeField] private Renderer[] renderers;
 
+        public ResourceCost cost;
+        public float buildingPointsCost;
+        public BuildingType type;
+        
         public void SetColor(Color color)
         {
             foreach (var renderer in renderers)

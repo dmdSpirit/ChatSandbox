@@ -52,5 +52,10 @@ namespace dmdspirit
             carriedResource.type = ResourceType.None;
             carriedResource.value = 0;
         }
+
+        public void Build(BuildingType buildingType, MapPosition mapPosition)
+        {
+            unitBehaviour.Build(buildingType, mapPosition);
+        }
     }
 }

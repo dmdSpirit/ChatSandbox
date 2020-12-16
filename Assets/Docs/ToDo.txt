@@ -6,25 +6,38 @@
     + Behaviour state machine
     + Wondering around on idle state
     + Resource gathering loop
-    
-- Map grid
++ Map grid
++ Bots try to gather random resource instead of just wondering around when in idle state.
+
 - Building
-    - Tower
+    + Tower
+    + !build a2 command
+    + Building progress bar
+    - Finish building site that was left by builder
     - Barracks
 - Combat
+    - Unit agro range
+    - Unit fighting
+    - Tower attacking enemies
 - Jobs
+    -Warrior
 - Unit respawn
 - Show resource icon if unit is carrying something
 - Show current task icon or visualize path
+- Bots getting stuck in the building while idle walking
 
 ------------------------------
 Future:
+- building site (units have to carry resources needed for building to the building site to finish building)
+- build zone (sc pylon or radius around any building)
 - BAN LIST
 - Figure a way to remove units collision with each other
 - Map generation
 - User database
     - user id consistency
-- !kill userName
+- !kill userName (attack userName if unit is found in agro radius)
+- Commands for bots (specify a sector to work in)
+- Plant trees
 
 
 ------------------------------

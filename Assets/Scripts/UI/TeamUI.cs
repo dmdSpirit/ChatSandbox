@@ -22,10 +22,11 @@ namespace dmdspirit
         {
             stoneValue.SetText(stone.ToString());
             woodValue.SetText(wood.ToString());
+            this.team = team;
             team.OnResourceChange += ResourceChangeHandler;
             team.OnUnitAdded += UnitAddedHandler;
             var bgColor = team.teamColor;
-            bgColor.a = .3f;
+            bgColor.a = .8f;
             background.color = bgColor;
             foreach (var unitName in unitNames)
                 unitName.gameObject.SetActive(false);
@@ -38,19 +39,10 @@ namespace dmdspirit
             unitNumber++;
         }
 
-        private void ResourceChangeHandler(ResourceType type, int value)
+        private void ResourceChangeHandler()
         {
-            switch (type)
-            {
-                case ResourceType.None:
-                    break;
-                case ResourceType.Tree:
-                    woodValue.SetText(value.ToString());
-                    break;
-                case ResourceType.Stone:
-                    stoneValue.SetText(value.ToString());
-                    break;
-            }
+            woodValue.text = team.storedResources.wood.ToString();
+            stoneValue.text = team.storedResources.stone.ToString();
         }
 
         public void UpdateUnitName(int nameId, string newName) => unitNames[nameId].text = newName;

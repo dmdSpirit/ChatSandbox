@@ -56,8 +56,7 @@ namespace dmdspirit
 
             if (Vector3.Distance(agent.transform.position, target.transform.position) > gatheringDistance)
             {
-                var moveToResourceState = new MoveState(target.transform.position, agent, gatheringDistance);
-                PushState(moveToResourceState);
+                PushMoveState(target.transform.position);
             }
             else
             {
@@ -76,6 +75,13 @@ namespace dmdspirit
             }
         }
 
+        // TODO: Move to base class.
+        private void PushMoveState(Vector3 moveDestination)
+        {
+            var moveToBaseState = new MoveState(moveDestination, agent, gatheringDistance);
+            PushState(moveToBaseState);
+        }
+
         private void ReturnResources()
         {
             var baseEntrancePosition = unit.UnitTeam.baseBuilding.entrance.position;
@@ -85,8 +91,7 @@ namespace dmdspirit
                 return;
             }
 
-            var moveToBaseState = new MoveState(baseEntrancePosition, agent, gatheringDistance);
-            PushState(moveToBaseState);
+            PushMoveState(baseEntrancePosition);
         }
 
         private void SearchForTarget()

@@ -7,7 +7,7 @@ namespace dmdspirit
     public enum ResourceType
     {
         None,
-        Tree,
+        Wood,
         Stone
     }
 
@@ -15,6 +15,7 @@ namespace dmdspirit
     public struct ResourceValue
     {
         public ResourceType type;
+        // TODO: All resource values should be int.
         public float value;
     }
 
