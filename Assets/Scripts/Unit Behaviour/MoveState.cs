@@ -9,11 +9,11 @@ namespace dmdspirit
         private NavMeshAgent agent;
         private float stopDistance;
 
+
+        // TODO: Additional condition to check if moving should be stopped. Function delegate?
         public MoveState(Vector3 target, NavMeshAgent agent, float stopDistance)
         {
             var unit = agent.GetComponent<Unit>();
-            if (unit.IsPlayer)
-                Debug.Log($"{agent.gameObject.name} started move state to {target.ToString()}.");
             this.target = target;
             this.agent = agent;
             this.stopDistance = stopDistance;
@@ -29,8 +29,14 @@ namespace dmdspirit
 
         public override void Update()
         {
-            // TODO: Check if the target is reachable.
+            // HACK: Not sure this will work at all.
+            if (agent.path.status == NavMeshPathStatus.PathComplete)
+            {
+                Finish();
+                return;
+            }
 
+            // TODO: Check if the target is reachable.
             if (Vector3.Distance(agent.transform.position, target) > stopDistance) return;
             agent.ResetPath();
             Finish();

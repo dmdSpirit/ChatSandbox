@@ -67,7 +67,6 @@ namespace dmdspirit
                     unit.carriedResource.value += gatheredAmount;
                     if (unit.carriedResource.type == ResourceType.None)
                         unit.carriedResource.type = target.value.type;
-                    Debug.Log($"{unit.name} gathered {gatheredAmount} of {unit.carriedResource.type}.");
                     gatheringTimer = 0;
                 }
 
@@ -102,7 +101,6 @@ namespace dmdspirit
                 return;
             }
 
-            Debug.Log($"{agent.gameObject.name} is looking for {resourceType.ToString()} resource.");
             var possibleResources = Map.Instance.resources[resourceType];
             // FIXME: Check before searching. And may be I should send unit to gather other resources instead.
             if (possibleResources.Count == 0)

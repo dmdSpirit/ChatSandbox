@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,8 +19,12 @@ namespace dmdspirit
         // IMPROVE: Handle unit list, not just adding a unit.
         private int unitNumber = 0;
 
+        // HACK:
+        private List<string> namesList;
+
         public void Initialize(Team team, int stone, int wood)
         {
+            namesList = new List<string>();
             stoneValue.SetText(stone.ToString());
             woodValue.SetText(wood.ToString());
             this.team = team;
@@ -34,9 +39,11 @@ namespace dmdspirit
 
         private void UnitAddedHandler(Unit unit)
         {
+            if (namesList.Contains(unit.name)) return;
             unitNames[unitNumber].gameObject.SetActive(true);
             unitNames[unitNumber].SetText(unit.name);
             unitNumber++;
+            namesList.Add(unit.name);
         }
 
         private void ResourceChangeHandler()
@@ -45,6 +52,11 @@ namespace dmdspirit
             stoneValue.text = team.storedResources.stone.ToString();
         }
 
-        public void UpdateUnitName(int nameId, string newName) => unitNames[nameId].text = newName;
+        public void UpdateUnitName(int nameId, string newName)
+        {
+            namesList.Remove(unitNames[nameId].text);
+            unitNames[nameId].text = newName;
+            namesList.Add(newName);
+        }
     }
 }

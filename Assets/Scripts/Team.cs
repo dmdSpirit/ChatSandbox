@@ -19,19 +19,21 @@ namespace dmdspirit
         [SerializeField] private Unit unitPrefab = default;
         [SerializeField] private string teamName = "team";
         [SerializeField] private TeamUI ui;
+        [SerializeField] private float respawnTimer = 15;
 
         public ResourceCost storedResources;
 
-        private List<Unit> units;
+        public List<Unit> Units { get; private set; }
+
         private List<string> players;
         private List<int> botUnits;
         private List<Building> buildings;
 
-        private int maxUnitCount = 3;
+        private int maxUnitCount;
 
         private void Start()
         {
-            baseBuilding.SetColor(teamColor);
+            baseBuilding.Initialize(this);
             baseBuilding.name = "Base";
         }
 
@@ -73,21 +75,22 @@ namespace dmdspirit
         private IEnumerator SpawnUnits()
         {
             yield return new WaitForSeconds(spawnCooldown);
-            units = new List<Unit>();
+            Units = new List<Unit>();
             for (var i = 0; i < maxUnitCount; i++)
             {
                 var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
-                units.Add(unit);
+                Units.Add(unit);
+                unit.OnDeath += UnitDeathHandler;
                 var isPlayerUnit = i < players.Count;
                 string unitName;
                 if (isPlayerUnit)
                 {
                     unitName = players[i];
-                    GameController.Instance.PlayerUnitCreated(players[i], unit);
+                    GameController.Instance.RegisterPlayerUnit(players[i], unit);
                 }
                 else
                 {
-                    unitName = string.Concat(teamName, " ", units.Count);
+                    unitName = string.Concat(teamName, " ", Units.Count);
                     botUnits.Add(i);
                 }
 
@@ -97,15 +100,32 @@ namespace dmdspirit
             }
         }
 
+        private IEnumerator SpawnUnit(string unitName, bool isPlayer)
+        {
+            yield return new WaitForSeconds(respawnTimer);
+            // TODO: Update spawn timer on UI.
+            var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
+            Units.Add(unit);
+            unit.Initialize(this, unitName, teamColor, isPlayer);
+            GameController.Instance.RegisterPlayerUnit(unitName, unit);
+            OnUnitAdded?.Invoke(unit);
+        }
+
         public Unit SwapBotForPlayer(string userName)
         {
             if (botUnits.Count == 0) return null;
             var botId = botUnits[0];
             botUnits.Remove(botUnits[0]);
 
-            units[botId].SwapBotForPlayer(userName);
+            Units[botId].SwapBotForPlayer(userName);
             ui.UpdateUnitName(botId, userName);
-            return units[botId];
+            return Units[botId];
+        }
+
+        private void UnitDeathHandler(Unit unit)
+        {
+            Units.Remove(unit);
+            StartCoroutine(SpawnUnit(unit.name, unit.IsPlayer));
         }
     }
 }

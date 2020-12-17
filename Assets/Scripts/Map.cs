@@ -67,7 +67,6 @@ namespace dmdspirit
         public void StartGame()
         {
             var resourceObjects = FindObjectsOfType<Resource>();
-            Debug.Log($"Number of resources on map: {resourceObjects.Length}");
             foreach (var resource in resourceObjects)
             {
                 resources[resource.value.type].Add(resource);

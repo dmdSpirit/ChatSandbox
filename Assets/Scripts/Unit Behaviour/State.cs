@@ -13,15 +13,19 @@ namespace dmdspirit
 
         protected virtual void Finish() => OnStateFinish?.Invoke(this);
 
+        // TODO: I need to be able to stop only current state event if it has parent state.
+        // TODO: Do all states need an additional stop condition to be checked every update?
         public virtual void StopState()
         {
             Finish();
             parentState?.Finish();
         }
 
-        protected virtual void PushState(State state)
+
+        protected virtual void PushState(State state, bool saveParent = true)
         {
-            state.parentState = this;
+            if (saveParent)
+                state.parentState = this;
             OnPushState?.Invoke(state);
         }
     }

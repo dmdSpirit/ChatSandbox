@@ -51,6 +51,8 @@ namespace dmdspirit
             Map.Instance.StartGame();
         }
 
+        public Team GetEnemyTeam(Team team) => team == redTeam ? greenTeam : redTeam;
+
         private void BuildCommandHandler(string userName, BuildingType buildingType, MapPosition mapPosition)
         {
             if (playerUnits.ContainsKey(userName) == false) return;
@@ -110,10 +112,16 @@ namespace dmdspirit
             {
                 var unit = playerTeam.SwapBotForPlayer(userName);
                 if (unit != null)
-                    playerUnits.Add(userName, unit);
+                    RegisterPlayerUnit(userName, unit);
             }
             else
                 joinUI.UpdatePlayers(greenTeamPlayers, redTeamPlayers);
+        }
+
+        private void UnitDeathHandler(Unit unit)
+        {
+            if (unit.IsPlayer)
+                playerUnits.Remove(unit.Player);
         }
 
         private void StartSession()
@@ -167,9 +175,10 @@ namespace dmdspirit
             UserJoinHandler(string.Concat("testUser", Random.Range(0, 100).ToString()), teamTag);
         }
 
-        public void PlayerUnitCreated(string player, Unit unit)
+        public void RegisterPlayerUnit(string player, Unit unit)
         {
             playerUnits.Add(player, unit);
+            unit.OnDeath += UnitDeathHandler;
         }
     }
 }

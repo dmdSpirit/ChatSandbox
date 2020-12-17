@@ -9,6 +9,7 @@ namespace dmdspirit
     public class UnitBehaviour : MonoBehaviour
     {
         [SerializeField] private float idleWalkRadius = 5f;
+        [SerializeField] private float aggroRadius = 10f;
 
         public float gatheringDistance = 1f;
         public float gatheringAmount = 1f;
@@ -18,6 +19,7 @@ namespace dmdspirit
 
         private Unit unit;
         private Stack<State> stateStack;
+        private SearchForEnemiesState searchForEnemiesState;
         private NavMeshAgent agent;
 
 
@@ -30,6 +32,9 @@ namespace dmdspirit
 
         private void Update()
         {
+            // HACK:
+            if (unit.IsAlive == false) return;
+            searchForEnemiesState?.Update();
             // TODO: Handle empty state stack.
             if (stateStack.Count != 0)
                 stateStack.Peek().Update();
@@ -44,6 +49,7 @@ namespace dmdspirit
         {
             var idleState = new IdleState(agent, idleWalkRadius);
             PushNewStateHandler(idleState);
+            StartSearchingForEnemies();
         }
 
         private void StateFinishHandler(State finishedState)
@@ -87,6 +93,19 @@ namespace dmdspirit
                 var currentState = stateStack.Peek();
                 currentState.StopState();
             }
+        }
+
+        public void AttackUnit(Unit target, float attackDistance, float attackCooldown)
+        {
+            var attackState = new AttackState(unit, target, attackDistance, attackCooldown);
+            attackState.OnStateFinish += (x) => StartSearchingForEnemies();
+            PushNewStateHandler(attackState);
+        }
+
+        private void StartSearchingForEnemies()
+        {
+            searchForEnemiesState = new SearchForEnemiesState(unit, aggroRadius);
+            searchForEnemiesState.OnStateFinish += (x) => searchForEnemiesState = null;
         }
     }
 }

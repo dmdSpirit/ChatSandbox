@@ -19,7 +19,7 @@ namespace dmdspirit
         {
             this.team = team;
             Building = Instantiate(buildingPrefab, transform);
-            Building.SetColor(team.teamColor);
+            Building.Initialize(team);
             buildingPoints = 0;
             progressBar.SetProgress(buildingPoints / Building.buildingPointsCost);
         }
@@ -27,13 +27,13 @@ namespace dmdspirit
         public void AddBuildingPoints(float buildingPoints)
         {
             this.buildingPoints += buildingPoints;
-            Debug.Log($"Building {Building.type.ToString()} progress {this.buildingPoints}/{Building.buildingPointsCost}");
             // TODO: Animate building process.
             progressBar.SetProgress(this.buildingPoints / Building.buildingPointsCost);
 
             if (this.buildingPoints >= Building.buildingPointsCost)
             {
                 isFinished = true;
+                Building.isFinished = true;
                 OnBuildingComplete?.Invoke();
             }
         }
