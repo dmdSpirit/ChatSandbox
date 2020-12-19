@@ -1,68 +1,62 @@
-﻿using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 namespace dmdspirit
 {
     public class GatherState : State
     {
-        private NavMeshAgent agent;
+        private Unit unit;
         private Resource target;
         private ResourceType resourceType;
-        private float gatheringDistance;
-        private float gatheringCooldown;
         private float gatheringTimer = 0f;
-        private float gatheringAmount;
-        private Unit unit;
 
-        public GatherState(NavMeshAgent agent, float gatheringDistance, float gatheringCooldown, float gatheringAmount, ResourceType resourceType = ResourceType.None, Resource target = null)
+        private float GatheringDistance => unit.CurrentJob.gatheringDistance;
+        private float GatheringCooldown => unit.CurrentJob.gatheringCooldown;
+        private float GatheringAmount => unit.CurrentJob.gatheringAmount;
+        private float MaxCarryingCapacity => unit.CurrentJob.maxCarryingCapacity;
+
+        public GatherState(Unit unit, ResourceType resourceType)
         {
+            if (resourceType == ResourceType.None)
+            {
+                Debug.LogError($"{unit.name} is trying to gather resource of type {ResourceType.None}.");
+                StopState();
+                return;
+            }
+
             // HACK: Not sure.
             // TODO: Subscribe to target OnResourceDepleted.
-            unit = agent.GetComponent<Unit>();
+            this.unit = unit;
+            this.resourceType = resourceType;
+            target = null;
             if (unit.IsPlayer)
-                Debug.Log($"{agent.gameObject.name} started gather state for {resourceType.ToString()}.");
-            this.agent = agent;
-            this.gatheringDistance = gatheringDistance;
-            this.gatheringCooldown = gatheringCooldown;
-            this.gatheringAmount = gatheringAmount;
-            if (target != null)
-            {
-                this.target = target;
-                this.resourceType = target.value.type;
-            }
-            else
-            {
-                this.resourceType = resourceType;
-                this.target = null;
-            }
-
-            // TODO: If no resource type is None start gathering random resource. Or go idle?
+                Debug.Log($"{unit.gameObject.name} started gather state for {resourceType.ToString()}.");
         }
 
         public override void Update()
         {
-            if (unit.carriedResource.value >= unit.maxCarryingCapacity || (unit.carriedResource.type != resourceType && unit.carriedResource.type != ResourceType.None))
+            if (unit.carriedResource.value >= MaxCarryingCapacity || (unit.carriedResource.type != resourceType && unit.carriedResource.type != ResourceType.None))
             {
                 ReturnResources();
                 return;
             }
 
+            // HACK: Depleted nodes can still return non null target.
             if (target == null || target.value.value == 0)
             {
                 SearchForTarget();
                 return;
             }
 
-            if (Vector3.Distance(agent.transform.position, target.transform.position) > gatheringDistance)
+            if (Vector3.Distance(unit.transform.position, target.transform.position) > GatheringDistance)
             {
-                PushMoveState(target.transform.position);
+                PushMoveState(unit, target.transform.position, GatheringDistance);
             }
             else
             {
-                if (gatheringTimer >= gatheringCooldown)
+                if (gatheringTimer >= GatheringCooldown)
                 {
-                    var desiredValue = Mathf.Min(gatheringAmount, unit.maxCarryingCapacity - unit.carriedResource.value);
+                    var desiredValue = Mathf.Min(GatheringAmount, MaxCarryingCapacity - unit.carriedResource.value);
                     var gatheredAmount = target.GatherResource(desiredValue);
                     unit.carriedResource.value += gatheredAmount;
                     if (unit.carriedResource.type == ResourceType.None)
@@ -74,30 +68,23 @@ namespace dmdspirit
             }
         }
 
-        // TODO: Move to base class.
-        private void PushMoveState(Vector3 moveDestination)
-        {
-            var moveToBaseState = new MoveState(moveDestination, agent, gatheringDistance);
-            PushState(moveToBaseState);
-        }
-
         private void ReturnResources()
         {
             var baseEntrancePosition = unit.UnitTeam.baseBuilding.entrance.position;
-            if (Vector3.Distance(baseEntrancePosition, unit.transform.position) <= gatheringDistance)
+            if (Vector3.Distance(baseEntrancePosition, unit.transform.position) <= GatheringDistance)
             {
                 unit.LoadResourcesToBase();
                 return;
             }
 
-            PushMoveState(baseEntrancePosition);
+            PushMoveState(unit, baseEntrancePosition, GatheringDistance);
         }
 
         private void SearchForTarget()
         {
             if (resourceType == ResourceType.None)
             {
-                Debug.LogError($"{agent.gameObject.name} is trying to search for None resource.");
+                Debug.LogError($"{unit.name} is trying to search for None resource.");
                 return;
             }
 
@@ -116,7 +103,7 @@ namespace dmdspirit
             var distance = Mathf.Infinity;
             foreach (var possibleResource in possibleResources)
             {
-                var newDistance = Vector3.Distance(agent.transform.position, possibleResource.transform.position);
+                var newDistance = Vector3.Distance(unit.transform.position, possibleResource.transform.position);
                 if (newDistance < distance)
                 {
                     target = possibleResource;

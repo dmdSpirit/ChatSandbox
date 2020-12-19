@@ -5,13 +5,13 @@ namespace dmdspirit
     public class SearchForEnemiesState : State
     {
         private Unit unit;
-        private float aggroRadius;
-        private LayerMask unitLayer = LayerMask.NameToLayer("Unit");
+        private float AggroRadius => unit.CurrentJob.aggroRadius;
 
-        public SearchForEnemiesState(Unit unit, float aggroRadius)
+        private static LayerMask unitLayer = LayerMask.NameToLayer("Unit");
+
+        public SearchForEnemiesState(Unit unit)
         {
             this.unit = unit;
-            this.aggroRadius = aggroRadius;
         }
 
         public override void Update()
@@ -19,7 +19,7 @@ namespace dmdspirit
             // IMPROVE: Better check unit lists that OverlapSphere every update for every unit?
             var enemyUnits = GameController.Instance.GetEnemyTeam(unit.UnitTeam).Units;
             Unit closestEnemy = null;
-            float distance = aggroRadius;
+            var distance = AggroRadius;
             foreach (var enemy in enemyUnits)
             {
                 // HACK: check to cover some problems in unitList update for GameController.
@@ -32,11 +32,9 @@ namespace dmdspirit
                 }
             }
 
-            if (closestEnemy != null)
-            {
-                unit.AttackUnit(closestEnemy);
-                StopState();
-            }
+            if (closestEnemy == null) return;
+            unit.AttackUnit(closestEnemy);
+            StopState();
         }
     }
 }

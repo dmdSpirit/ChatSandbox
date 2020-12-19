@@ -30,13 +30,14 @@ namespace dmdspirit
             public TeamTag teamTag;
             public BuildingType buildingType;
             public MapPosition position;
+            public TileDirection direction;
         }
 
         public event Action<string, TeamTag> OnUserJoin;
 
         // FIXME: Should be separate entity, parsing all commands using ingame logic.
         public event Action<string, ResourceType> OnGatherCommand;
-        public event Action<string, BuildingType, MapPosition> OnBuildCommand;
+        public event Action<string, BuildingType, MapPosition, TileDirection> OnBuildCommand;
 
         private struct Message
         {
@@ -84,7 +85,7 @@ namespace dmdspirit
                         break;
                     case ChatCommands.Build:
                         if (Map.Instance.CheckPosition(command.position))
-                            OnBuildCommand?.Invoke(command.user, command.buildingType, command.position);
+                            OnBuildCommand?.Invoke(command.user, command.buildingType, command.position, command.direction);
                         break;
                 }
             }
@@ -117,10 +118,16 @@ namespace dmdspirit
                     break;
                 case ChatCommands.Build:
                     var args = e.Command.ArgumentsAsList;
-                    if (args.Count == 2 &&
+                    if (args.Count >= 2 &&
                         MapPosition.TryParse(args[0], out var mapPosition) &&
                         Enum.TryParse<BuildingType>(args[1], true, out var buildingType))
-                        commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Build, buildingType = buildingType, position = mapPosition});
+                    {
+                        var newCommand = new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Build, buildingType = buildingType, position = mapPosition};
+                        if (args.Count > 2 && Enum.TryParse<TileDirection>(args[2], true, out var direction))
+                            newCommand.direction = direction;
+                        commandList.Add(newCommand);
+                    }
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -141,7 +148,7 @@ namespace dmdspirit
 
         private void OnDestroy() => client.Disconnect();
 
-        private void ConnectedHandler(object sender, OnConnectedArgs e) => Debug.Log($"Game connected to {e.AutoJoinChannel}");
+        private void ConnectedHandler(object sender, OnConnectedArgs e) => Debug.Log($"Game connected to {client.JoinedChannels[0].Channel}");
 
         private void DisconnectedHandler(object sender, OnDisconnectedArgs e) => Debug.Log($"Game disconnected.");
     }

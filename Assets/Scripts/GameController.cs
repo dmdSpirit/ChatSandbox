@@ -31,10 +31,11 @@ namespace dmdspirit
         private Coroutine joinTimerCoroutine;
         private bool isSessionRunning = false;
 
-        public List<BuildingType> canBeBuild = new List<BuildingType>() {BuildingType.Tower};
+        public List<BuildingType> CanBeBuild { get; private set; }
 
         public void StartGame()
         {
+            CanBeBuild = new List<BuildingType>() {BuildingType.Tower, BuildingType.Barracks};
             redTeamPlayers = new List<string>();
             greenTeamPlayers = new List<string>();
             playerUnits = new Dictionary<string, Unit>();
@@ -53,10 +54,10 @@ namespace dmdspirit
 
         public Team GetEnemyTeam(Team team) => team == redTeam ? greenTeam : redTeam;
 
-        private void BuildCommandHandler(string userName, BuildingType buildingType, MapPosition mapPosition)
+        private void BuildCommandHandler(string userName, BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
         {
             if (playerUnits.ContainsKey(userName) == false) return;
-            playerUnits[userName].Build(buildingType, mapPosition);
+            playerUnits[userName].Build(buildingType, mapPosition, direction);
         }
 
 
@@ -121,7 +122,7 @@ namespace dmdspirit
         private void UnitDeathHandler(Unit unit)
         {
             if (unit.IsPlayer)
-                playerUnits.Remove(unit.Player);
+                playerUnits.Remove(unit.PlayerName);
         }
 
         private void StartSession()

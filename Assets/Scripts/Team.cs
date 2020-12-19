@@ -8,48 +8,39 @@ namespace dmdspirit
 {
     public class Team : MonoBehaviour
     {
-        public TeamTag teamTag;
         public event Action OnResourceChange;
         public event Action<Unit> OnUnitAdded;
 
+        public TeamTag teamTag;
         public Color teamColor = Color.green;
+        public string teamName = "team";
         public BaseBuilding baseBuilding = default;
-
-        [SerializeField] private float spawnCooldown = 1f;
-        [SerializeField] private Unit unitPrefab = default;
-        [SerializeField] private string teamName = "team";
-        [SerializeField] private TeamUI ui;
-        [SerializeField] private float respawnTimer = 15;
-
         public ResourceCost storedResources;
+
+        [SerializeField] private TeamUI ui;
+        [SerializeField] private Unit unitPrefab = default;
+        [SerializeField] private float spawnCooldown = 1f;
+        [SerializeField] private float respawnTimer = 15;
 
         public List<Unit> Units { get; private set; }
 
-        private List<string> players;
-        private List<int> botUnits;
         private List<Building> buildings;
-
-        private int maxUnitCount;
 
         private void Start()
         {
             baseBuilding.Initialize(this);
-            baseBuilding.name = "Base";
         }
 
-        // HACK: OMG(
         public void HideUI() => ui.gameObject.SetActive(false);
 
         public void Initialize(List<string> players, int maxUnitCount)
         {
-            botUnits = new List<int>();
             buildings = new List<Building>();
-            this.players = players;
-            this.maxUnitCount = maxUnitCount;
-            StartCoroutine(SpawnUnits());
+            buildings.Add(baseBuilding);
+            StartCoroutine(SpawnUnits(players, maxUnitCount));
             ui.gameObject.SetActive(true);
             storedResources = new ResourceCost();
-            ui.Initialize(this, 0, 0);
+            ui.Initialize(this);
         }
 
         public void AddResource(ResourceValue value)
@@ -65,6 +56,7 @@ namespace dmdspirit
             OnResourceChange?.Invoke();
         }
 
+        // IMPROVE: Add on creation of building site.
         public void AddBuilding(BuildingSite buildingSite)
         {
             var building = buildingSite.Building;
@@ -72,10 +64,11 @@ namespace dmdspirit
             buildingSite.DestroySite();
         }
 
-        private IEnumerator SpawnUnits()
+        private IEnumerator SpawnUnits(List<string> players, int maxUnitCount)
         {
             yield return new WaitForSeconds(spawnCooldown);
             Units = new List<Unit>();
+            // BUG: Not handled correctly if someone !join while units are spawning.
             for (var i = 0; i < maxUnitCount; i++)
             {
                 var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
@@ -94,13 +87,13 @@ namespace dmdspirit
                     botUnits.Add(i);
                 }
 
-                unit.Initialize(this, unitName, teamColor, isPlayerUnit);
                 OnUnitAdded?.Invoke(unit);
+                unit.Initialize(this, unitName, teamColor, isPlayerUnit);
                 yield return new WaitForSeconds(spawnCooldown);
             }
         }
 
-        private IEnumerator SpawnUnit(string unitName, bool isPlayer)
+        private IEnumerator RespawnUnit(string unitName, bool isPlayer)
         {
             yield return new WaitForSeconds(respawnTimer);
             // TODO: Update spawn timer on UI.
@@ -108,7 +101,6 @@ namespace dmdspirit
             Units.Add(unit);
             unit.Initialize(this, unitName, teamColor, isPlayer);
             GameController.Instance.RegisterPlayerUnit(unitName, unit);
-            OnUnitAdded?.Invoke(unit);
         }
 
         public Unit SwapBotForPlayer(string userName)
@@ -125,7 +117,7 @@ namespace dmdspirit
         private void UnitDeathHandler(Unit unit)
         {
             Units.Remove(unit);
-            StartCoroutine(SpawnUnit(unit.name, unit.IsPlayer));
+            StartCoroutine(RespawnUnit(unit.name, unit.IsPlayer));
         }
     }
 }

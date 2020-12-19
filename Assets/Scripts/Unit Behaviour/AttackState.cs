@@ -5,26 +5,22 @@ namespace dmdspirit
 {
     public class AttackState : State
     {
-        private NavMeshAgent agent;
-        private Unit target;
         private Unit unit;
-        private float attackDistance;
-        private float attackCooldown;
-        private float attackTimer;
+        private Unit target;
+        private float attackTimer = 0;
+        private const float shortChase = 2f;
 
-        private float stortChase = 4f;
+        private float AttackRange => unit.CurrentJob.attackRange;
+        private float AttackCooldown => unit.CurrentJob.attackCooldown;
 
-        // IMPROVE: Get unit instead of agent. Base states do not need NavMeshAgent.
-        public AttackState(Unit unit, Unit target, float attackDistance, float attackCooldown)
+        // HACK: This fixes unit resetting attack cd when its target is pushed away.
+
+        public AttackState(Unit unit, Unit target)
         {
             this.unit = unit;
-            agent = unit.GetComponent<NavMeshAgent>();
             Debug.Log($"{unit.name} started attacking {target.name}.");
             this.target = target;
-            this.attackDistance = attackDistance;
-            this.attackCooldown = attackCooldown;
         }
-
 
         public override void Update()
         {
@@ -34,12 +30,12 @@ namespace dmdspirit
                 return;
             }
 
-            var distance = Vector3.Distance(agent.transform.position, target.transform.position);
-            if (distance > attackDistance)
+            var distance = Vector3.Distance(unit.transform.position, target.transform.position);
+            if (distance > AttackRange)
             {
                 PushChaseState();
                 // HACK: To stop instant attacks when target is pushed away little by little.
-                if (distance > stortChase)
+                if (distance > shortChase)
                     attackTimer = 0;
                 return;
             }
@@ -53,12 +49,12 @@ namespace dmdspirit
         private void Attack()
         {
             unit.DealDamage(target);
-            attackTimer = attackCooldown;
+            attackTimer = AttackCooldown;
         }
 
         private void PushChaseState()
         {
-            var chaseState = new ChaseState(unit, target, attackDistance);
+            var chaseState = new ChaseState(unit, target, AttackRange);
             PushState(chaseState);
         }
     }

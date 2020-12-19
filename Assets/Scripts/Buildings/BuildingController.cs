@@ -52,6 +52,7 @@ namespace dmdspirit
         [SerializeField] private BuildingSite buildingSitePrefab;
         [SerializeField] private BaseBuilding basePrefab;
         [SerializeField] private TowerBuilding towerPrefab;
+        [SerializeField] private Barracks barracksPrefab;
 
         public ResourceCost GetBuildingCost(BuildingType buildingType) => GetBuildingPrefab(buildingType).cost;
 
@@ -65,15 +66,17 @@ namespace dmdspirit
                     return basePrefab;
                 case BuildingType.Tower:
                     return towerPrefab;
+                case BuildingType.Barracks:
+                    return barracksPrefab;
             }
 
             return null;
         }
 
-        public BuildingSite CreateBuildingSite(Team team, BuildingType buildingType, MapTile mapTile)
+        public BuildingSite CreateBuildingSite(Team team, BuildingType buildingType, MapTile mapTile, TileDirection direction)
         {
             // TODO: Also add building facing direction.
-            var buildingSite = Instantiate(buildingSitePrefab, mapTile.transform);
+            var buildingSite = Instantiate(buildingSitePrefab, mapTile.transform.position, Quaternion.Euler(0, 90 * (int) direction, 0), mapTile.transform);
             buildingSite.Initialize(team, GetBuildingPrefab(buildingType));
             return buildingSite;
         }

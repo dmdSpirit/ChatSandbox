@@ -48,7 +48,6 @@ namespace dmdspirit
 
         private void DestroyNode()
         {
-            Debug.Log($"{name} was depleted.");
             Destroy(gameObject);
         }
     }

@@ -349,7 +349,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6788459842601912598}
   - component: {fileID: -6745474534248249533}
-  - component: {fileID: 2671453067577733721}
   - component: {fileID: 2466006693194753509}
   m_Layer: 0
   m_Name: Tower
@@ -398,24 +397,11 @@ MonoBehaviour:
     wood: 8
   buildingPointsCost: 10
   type: 0
+  isFinished: 0
   attackDamage: 2
   attackRadius: 15
   attackCooldown: 3
   radiusCircle: {fileID: 8825274157488768398}
---- !u!136 &2671453067577733721
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6788459842601912599}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  m_Radius: 1.5
-  m_Height: 5.79
-  m_Direction: 1
-  m_Center: {x: 0, y: 1.8, z: 0}
 --- !u!208 &2466006693194753509
 NavMeshObstacle:
   m_ObjectHideFlags: 0

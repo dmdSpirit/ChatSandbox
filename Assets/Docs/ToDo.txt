@@ -8,11 +8,11 @@
     + Resource gathering loop
 + Map grid
 + Bots try to gather random resource instead of just wondering around when in idle state.
-- Building
++ Building
     + Tower
     + !build a2 command
     + Building progress bar
-    - Barracks
+    + Barracks
 + Combat
     + Unit agro range
     + Unit fighting
@@ -21,10 +21,12 @@
     + Unit hp bar
 + Unit respawn
 - Jobs
-    -Warrior
+    - Warrior
+    - Worker
 - !patrol a1 z9
 - Show resource icon if unit is carrying something
 - Show current task icon or visualize path
+- Gameplay footage 
 
 ------------------------------
 Future:
@@ -46,7 +48,11 @@ Future:
 - Plant trees
 - !move a2
 - after v3-4 refactor and solve all //TODO:s
-
+- Workers move slower with resources
+- Unit regeneration
+- Stop using NavMesh. (Check Pathfinder: Kingmaker game code for other navigation system)
+- Different speed for idle walking, chasing and so on
+- For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
 
 ------------------------------
 ------------------------------

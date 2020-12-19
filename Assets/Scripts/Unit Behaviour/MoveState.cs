@@ -9,33 +9,32 @@ namespace dmdspirit
         private NavMeshAgent agent;
         private float stopDistance;
 
-
-        // TODO: Additional condition to check if moving should be stopped. Function delegate?
-        public MoveState(Vector3 target, NavMeshAgent agent, float stopDistance)
+        public MoveState(Unit unit, Vector3 target, float stopDistance)
         {
-            var unit = agent.GetComponent<Unit>();
             this.target = target;
-            this.agent = agent;
+            agent = unit.Agent;
             this.stopDistance = stopDistance;
             var path = new NavMeshPath();
             if (agent.CalculatePath(target, path) == false)
             {
+                // BUG: Does not get handled correctly by UnitBehaviour.
                 Finish();
                 return;
             }
-
+            
+            // NOTE: This should be changed if unit speed can be changed while it is moving (slow effect).
+            agent.speed = unit.CurrentJob.movementSpeed;
             agent.SetPath(path);
         }
 
         public override void Update()
         {
-            // HACK: Not sure this will work at all.
             if (agent.path.status == NavMeshPathStatus.PathComplete)
             {
                 Finish();
                 return;
             }
-
+            
             // TODO: Check if the target is reachable.
             if (Vector3.Distance(agent.transform.position, target) > stopDistance) return;
             agent.ResetPath();

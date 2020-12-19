@@ -8,41 +8,42 @@ namespace dmdspirit
     {
         None,
         Base,
-        Tower
+        Tower,
+        Barracks
     }
 
     public class BuildState : State
     {
-        private NavMeshAgent agent;
+        private Unit unit;
         private MapTile targetTile;
         private BuildingType buildingType;
-        private float buildingDistance;
-        private Unit unit;
+        private TileDirection direction;
         private BuildingSite buildingSite;
-        private float buildingSpeed;
 
-        public BuildState(NavMeshAgent agent, BuildingType buildingType, MapTile targetTile, float buildingDistance, float buildingSpeed)
+        private float BuildingDistance => unit.CurrentJob.buildingDistance;
+        private float BuildingSpeed => unit.CurrentJob.buildingSpeed;
+
+        public BuildState(Unit unit, MapTile targetTile, BuildingType buildingType, TileDirection direction)
         {
-            if (GameController.Instance.canBeBuild.Contains(buildingType) == false)
+            this.unit = unit;
+            if (GameController.Instance.CanBeBuild.Contains(buildingType) == false)
             {
-                Debug.LogError($"{agent.gameObject.name} is trying to build {buildingType.ToString()}, but this type of building is not allowed.");
+                Debug.LogError($"{unit.name} is trying to build {buildingType.ToString()}, but this type of building is not allowed.");
+                // FIXME: Unit Behaviour does not handle correctly when state is stopped in constructor.
                 StopState();
                 return;
             }
 
-            unit = agent.GetComponent<Unit>();
             this.targetTile = targetTile;
-            this.agent = agent;
             this.buildingType = buildingType;
-            this.buildingDistance = buildingDistance;
-            this.buildingSpeed = buildingSpeed;
+            this.direction = direction;
         }
 
         public override void Update()
         {
-            if (Vector3.Distance(agent.transform.position, targetTile.transform.position) > buildingDistance)
+            if (Vector3.Distance(unit.transform.position, targetTile.transform.position) > BuildingDistance)
             {
-                PushMoveState(targetTile.transform.position);
+                PushMoveState(unit, targetTile.transform.position, BuildingDistance);
                 return;
             }
 
@@ -60,19 +61,13 @@ namespace dmdspirit
                     return;
 
                 Debug.Log($"{unit.name} has started building {buildingType.ToString()}.");
-                buildingSite = BuildingController.Instance.CreateBuildingSite(unit.UnitTeam, buildingType, targetTile);
+                buildingSite = BuildingController.Instance.CreateBuildingSite(unit.UnitTeam, buildingType, targetTile, direction);
                 buildingSite.OnBuildingComplete += BuildingCompleteHandler;
                 unit.UnitTeam.SpendResources(cost);
                 return;
             }
 
-            buildingSite.AddBuildingPoints(buildingSpeed * Time.deltaTime);
-        }
-
-        private void PushMoveState(Vector3 moveDestination)
-        {
-            var moveToBaseState = new MoveState(moveDestination, agent, buildingDistance);
-            PushState(moveToBaseState);
+            buildingSite.AddBuildingPoints(BuildingSpeed * Time.deltaTime);
         }
 
         private void BuildingCompleteHandler()
