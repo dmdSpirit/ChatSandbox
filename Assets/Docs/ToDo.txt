@@ -19,10 +19,12 @@
     + Tower attacking enemies
     + Tower attack radius
     + Unit hp bar
-+ Unit respawn
-- Jobs
-    - Warrior
-    - Worker
++ Jobs
+    + Warrior
+    + Worker
+    + Icons
+    + Change job
+- Unit respawn
 - !patrol a1 z9
 - Show resource icon if unit is carrying something
 - Show current task icon or visualize path
@@ -37,6 +39,7 @@ Future:
 - Bots getting stuck in the building while idle walking
 - Update players UI
 - building site (units have to carry resources needed for building to the building site to finish building)
+- !build 'where' 'what' 'direction'
 - build zone (sc pylon or radius around any building)
 - BAN LIST
 - Figure a way to remove units collision with each other

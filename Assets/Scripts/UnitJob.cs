@@ -12,6 +12,7 @@ namespace dmdspirit
     public class UnitJob : ScriptableObject
     {
         public UnitJobType jobType;
+        public Sprite icon;
         public float maxHP;
         public float damage;
         public float attackRange;
@@ -22,7 +23,7 @@ namespace dmdspirit
         // IMPROVE: Create a list of available activities.
         public bool canGather;
         public int gatheringAmount;
-        public int gatheringDistance;
+        public float gatheringDistance;
         public float gatheringCooldown;
         public int maxCarryingCapacity;
         public bool canBuild;

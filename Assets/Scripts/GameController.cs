@@ -43,6 +43,7 @@ namespace dmdspirit
             ChatParser.Instance.OnUserJoin += UserJoinHandler;
             ChatParser.Instance.OnGatherCommand += GatherCommandHandler;
             ChatParser.Instance.OnBuildCommand += BuildCommandHandler;
+            ChatParser.Instance.OnJobCommand += JobCommandHandler;
             joinTimerCoroutine = StartCoroutine(JoinTimer());
             sessionTimerUI.Hide();
             resultsUI.Hide();
@@ -50,6 +51,12 @@ namespace dmdspirit
             greenTeam.HideUI();
             isSessionRunning = false;
             Map.Instance.StartGame();
+        }
+
+        private void JobCommandHandler(string userName, UnitJobType jobType)
+        {
+            if (playerUnits.ContainsKey(userName) == false) return;
+            playerUnits[userName].CommandToChangeJob(jobType);
         }
 
         public Team GetEnemyTeam(Team team) => team == redTeam ? greenTeam : redTeam;
@@ -90,7 +97,6 @@ namespace dmdspirit
 
             if (greenTeamPlayers.Contains(userName) || redTeamPlayers.Contains(userName) || (greenTeamPlayers.Count == maxTeamSize && redTeamPlayers.Count == maxTeamSize))
                 return;
-            Debug.Log($"User joining {userName} to {teamTag.ToString()}.");
             if (teamTag == TeamTag.None)
             {
                 if (greenTeamPlayers.Count > redTeamPlayers.Count)
@@ -105,24 +111,15 @@ namespace dmdspirit
             }
 
             var playerTeam = teamTag == TeamTag.green ? greenTeam : redTeam;
+            Debug.Log($"User joining {userName} to {teamTag.ToString()}.");
             if (teamTag == TeamTag.green)
                 greenTeamPlayers.Add(userName);
             else
                 redTeamPlayers.Add(userName);
             if (isSessionRunning)
-            {
-                var unit = playerTeam.SwapBotForPlayer(userName);
-                if (unit != null)
-                    RegisterPlayerUnit(userName, unit);
-            }
+                playerTeam.SwapBotForPlayer(userName);
             else
                 joinUI.UpdatePlayers(greenTeamPlayers, redTeamPlayers);
-        }
-
-        private void UnitDeathHandler(Unit unit)
-        {
-            if (unit.IsPlayer)
-                playerUnits.Remove(unit.PlayerName);
         }
 
         private void StartSession()
@@ -179,7 +176,6 @@ namespace dmdspirit
         public void RegisterPlayerUnit(string player, Unit unit)
         {
             playerUnits.Add(player, unit);
-            unit.OnDeath += UnitDeathHandler;
         }
     }
 }

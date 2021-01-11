@@ -40,6 +40,11 @@ namespace dmdspirit
 
         [SerializeField] private TilePosition[] tilePositions;
 
+        private void Start()
+        {
+            GenerateMap();
+        }
+
         public void GenerateMap()
         {
             ClearMap();

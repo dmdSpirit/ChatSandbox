@@ -5,7 +5,6 @@ namespace dmdspirit
 {
     public class BaseBuilding : Building
     {
-        public Transform entrance;
 
         private void Awake()
         {

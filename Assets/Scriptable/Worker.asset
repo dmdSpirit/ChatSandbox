@@ -12,14 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56c5d001c6d72554885f937c53ce1652, type: 3}
   m_Name: Worker
   m_EditorClassIdentifier: 
-  jobName: Worker
+  jobType: 0
+  icon: {fileID: 21300000, guid: 85b5c08cd5f304b4eb3a556df2a428d6, type: 3}
   maxHP: 10
   damage: 1
   attackRange: 1.2
   attackCooldown: 2
   aggroRadius: 15
-  moveSpeed: 3.5
+  idleWalkRadius: {x: 0, y: 0}
+  movementSpeed: 3.5
   canGather: 1
+  gatheringAmount: 1
+  gatheringDistance: 1.7
+  gatheringCooldown: 1
+  maxCarryingCapacity: 10
   canBuild: 1
+  buildingDistance: 3
+  buildingSpeed: 1
   buildingNeeded: 1
   modelPrefab: {fileID: 0}

@@ -49,12 +49,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   renderer: {fileID: 2545693539234771700}
   nameplate: {fileID: 3765713721165688694}
-  maxHP: 10
-  damage: 1
-  attackCooldown: 2
-  attackDistance: 1.2
   hpBar: {fileID: 7413395843589854990}
-  maxCarryingCapacity: 10
+  defaultJob: 0
+  jobs:
+  - {fileID: 11400000, guid: 7edeaba27b8901841a59c544fe74ac0f, type: 2}
+  - {fileID: 11400000, guid: fc7ab44ed1b363f4390c151759a20a26, type: 2}
   carriedResource:
     type: 0
     value: 0
@@ -70,13 +69,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ffaab1519ecbd94596f84feb48d47b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idleWalkRadius: 5
-  aggroRadius: 15
-  gatheringDistance: 2
-  gatheringAmount: 1
-  gatheringCooldown: 2
-  buildingRadius: 3
-  buildingSpeed: 1
 --- !u!195 &4449047809546455985
 NavMeshAgent:
   m_ObjectHideFlags: 0

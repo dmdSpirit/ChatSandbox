@@ -12,8 +12,8 @@ namespace dmdspirit
 
         private float GatheringDistance => unit.CurrentJob.gatheringDistance;
         private float GatheringCooldown => unit.CurrentJob.gatheringCooldown;
-        private float GatheringAmount => unit.CurrentJob.gatheringAmount;
-        private float MaxCarryingCapacity => unit.CurrentJob.maxCarryingCapacity;
+        private int GatheringAmount => unit.CurrentJob.gatheringAmount;
+        private int MaxCarryingCapacity => unit.CurrentJob.maxCarryingCapacity;
 
         public GatherState(Unit unit, ResourceType resourceType)
         {
@@ -58,7 +58,7 @@ namespace dmdspirit
                 {
                     var desiredValue = Mathf.Min(GatheringAmount, MaxCarryingCapacity - unit.carriedResource.value);
                     var gatheredAmount = target.GatherResource(desiredValue);
-                    unit.carriedResource.value += gatheredAmount;
+                    unit.AddResource(resourceType ,gatheredAmount);
                     if (unit.carriedResource.type == ResourceType.None)
                         unit.carriedResource.type = target.value.type;
                     gatheringTimer = 0;

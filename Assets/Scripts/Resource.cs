@@ -16,7 +16,7 @@ namespace dmdspirit
     {
         public ResourceType type;
         // TODO: All resource values should be int.
-        public float value;
+        public int value;
     }
 
     public class Resource : MonoBehaviour
@@ -39,7 +39,7 @@ namespace dmdspirit
             }
         }
 
-        public float GatherResource(float desiredValue)
+        public int GatherResource(int desiredValue)
         {
             var gatheredAmount = Mathf.Min(desiredValue, value.value);
             value.value -= gatheredAmount;

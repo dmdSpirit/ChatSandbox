@@ -1,5 +1,6 @@
 ﻿using System;
 using TMPro;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,6 +12,8 @@ namespace dmdspirit
         public event Action<Unit> OnDeath;
         public event Action OnUpdateHP;
         public event Action OnOwnerChanged;
+        public event Action OnCarriedResourceChanged;
+        public event Action OnJobChanged;
 
         [SerializeField] private new Renderer renderer;
         [SerializeField] private TMP_Text nameplate;
@@ -24,10 +27,9 @@ namespace dmdspirit
         public ResourceValue carriedResource;
 
         public bool IsAlive => HP > 0;
-        public bool IsPlayer => string.IsNullOrEmpty(PlayerName);
+        public bool IsPlayer { get; private set; }
         public Team UnitTeam { get; private set; }
         public int UnitID { get; private set; }
-        public string PlayerName { get; private set; }
         public NavMeshAgent Agent { get; private set; }
         public float HP { get; private set; }
         public UnitJob CurrentJob { get; private set; }
@@ -48,13 +50,13 @@ namespace dmdspirit
                 Destroy(gameObject);
         }
 
-        public void Initialize(Team team, int unitID, Color color, string playerName = "")
+        public void Initialize(Team team, int unitID, Color color, string playerName)
         {
             UnitTeam = team;
             nameplate.text = playerName;
-            PlayerName = playerName;
+            IsPlayer = string.IsNullOrEmpty(playerName) == false;
             UnitID = unitID;
-            name = IsPlayer ? PlayerName : $"{team.} {unitID}";
+            name = IsPlayer ? playerName : $"{team.teamName} {unitID}";
             renderer.material.SetColor("_Color", color);
             OnUpdateHP += UpdateHPBar;
             ChangeJob(defaultJob, true);
@@ -63,23 +65,49 @@ namespace dmdspirit
 
         public void SwapBotForPlayer(string playerName)
         {
-            PlayerName = playerName;
+            IsPlayer = true;
             nameplate.text = playerName;
             name = playerName;
+            OnOwnerChanged?.Invoke();
+        }
+
+        public void CommandToChangeJob(UnitJobType jobType)
+        {
+            if (TryGetJobFromType(jobType, out var job) == false || jobType == CurrentJob.jobType || UnitTeam.CheckHasBuilding(job.buildingNeeded) == false) return;
+            unitBehaviour.ChangeJob(job);
         }
 
         public void ChangeJob(UnitJobType jobType, bool setMaxHP = false)
         {
+            // TODO: Write job factory of some sort.
+            if (TryGetJobFromType(jobType, out var job) == false)
+            {
+                Debug.LogError($"{name} could not change job to jobType {jobType.ToString()}");
+                return;
+            }
+
+
+            var oldMaxHP = CurrentJob == null ? job.maxHP : CurrentJob.maxHP;
+            CurrentJob = job;
+            if (setMaxHP)
+                HP = CurrentJob.maxHP;
+            else
+                HP *= (CurrentJob.maxHP / oldMaxHP);
+            OnUpdateHP?.Invoke();
+            OnJobChanged?.Invoke();
+        }
+
+        private bool TryGetJobFromType(UnitJobType jobType, out UnitJob result)
+        {
+            result = null;
             foreach (var job in jobs)
             {
                 if (job.jobType != jobType) continue;
-                CurrentJob = job;
-                break;
+                result = job;
+                return true;
             }
 
-            if (setMaxHP)
-                HP = CurrentJob.maxHP;
-            OnUpdateHP?.Invoke();
+            return false;
         }
 
         public void GatherResource(ResourceType resourceType)
@@ -94,6 +122,7 @@ namespace dmdspirit
             UnitTeam.AddResource(carriedResource);
             carriedResource.type = ResourceType.None;
             carriedResource.value = 0;
+            OnCarriedResourceChanged?.Invoke();
         }
 
         public void Build(BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
@@ -115,11 +144,24 @@ namespace dmdspirit
             Debug.Log($"{name} takes {damage} damage. HP: ({HP}/{CurrentJob.maxHP})");
             if (HP <= 0)
             {
+                // TODO: Update unit UI on death.
                 OnDeath?.Invoke(this);
                 return;
             }
 
             OnUpdateHP?.Invoke();
+        }
+
+        public void AddResource(ResourceType type, int quantity)
+        {
+            if (carriedResource.type != ResourceType.None && carriedResource.type != type)
+            {
+                Debug.LogError($"Something is trying to add wrong resource type to {name}.");
+                return;
+            }
+
+            carriedResource.value += quantity;
+            OnCarriedResourceChanged?.Invoke();
         }
 
         public void AttackUnit(Unit target) => unitBehaviour.AttackUnit(target);

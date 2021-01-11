@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -40,6 +41,12 @@ namespace dmdspirit
             StopCurrentState();
             var gatherState = new GatherState(unit, resourceType);
             PushNewStateHandler(gatherState);
+        }
+
+        public void ChangeJob(UnitJob job)
+        {
+            StopCurrentState();
+            PushNewStateHandler(new ChangeJobState(unit, job));
         }
 
         public void Build(BuildingType buildingType, MapPosition mapPosition, TileDirection direction)

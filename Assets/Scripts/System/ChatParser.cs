@@ -7,6 +7,7 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace dmdspirit
@@ -20,6 +21,7 @@ namespace dmdspirit
             Wood,
             Stone,
             Build,
+            Job,
             Help
         }
 
@@ -31,6 +33,7 @@ namespace dmdspirit
             public BuildingType buildingType;
             public MapPosition position;
             public TileDirection direction;
+            public UnitJobType jobType;
         }
 
         public event Action<string, TeamTag> OnUserJoin;
@@ -38,6 +41,7 @@ namespace dmdspirit
         // FIXME: Should be separate entity, parsing all commands using ingame logic.
         public event Action<string, ResourceType> OnGatherCommand;
         public event Action<string, BuildingType, MapPosition, TileDirection> OnBuildCommand;
+        public event Action<string, UnitJobType> OnJobCommand;
 
         private struct Message
         {
@@ -87,6 +91,9 @@ namespace dmdspirit
                         if (Map.Instance.CheckPosition(command.position))
                             OnBuildCommand?.Invoke(command.user, command.buildingType, command.position, command.direction);
                         break;
+                    case ChatCommands.Job:
+                        OnJobCommand?.Invoke(command.user, command.jobType);
+                        break;
                 }
             }
 
@@ -127,6 +134,11 @@ namespace dmdspirit
                             newCommand.direction = direction;
                         commandList.Add(newCommand);
                     }
+
+                    break;
+                case ChatCommands.Job:
+                    if (e.Command.ArgumentsAsList.Count < 1 || Enum.TryParse<UnitJobType>(e.Command.ArgumentsAsList[0],true, out var jobType) == false) break;
+                    commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Job, jobType = jobType});
 
                     break;
                 default:

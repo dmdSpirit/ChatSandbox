@@ -43,6 +43,10 @@ namespace dmdspirit
             ui.Initialize(this);
         }
 
+        public List<Building> GetBuildingsOfType(BuildingType type) => buildings.Where(x => x.type == type).ToList();
+
+        public bool CheckHasBuilding(BuildingType type) => buildings.Any(x => x.type == type);
+
         public void AddResource(ResourceValue value)
         {
             Debug.Log($"Resource added to {teamName} team: ({value.type}, {value.value}).");
@@ -75,43 +79,42 @@ namespace dmdspirit
                 Units.Add(unit);
                 unit.OnDeath += UnitDeathHandler;
                 var isPlayerUnit = i < players.Count;
-                string unitName;
+                var unitName = string.Empty;
                 if (isPlayerUnit)
                 {
                     unitName = players[i];
                     GameController.Instance.RegisterPlayerUnit(players[i], unit);
                 }
-                else
-                {
-                    unitName = string.Concat(teamName, " ", Units.Count);
-                    botUnits.Add(i);
-                }
+
+                unit.Initialize(this, i, teamColor, unitName);
 
                 OnUnitAdded?.Invoke(unit);
-                unit.Initialize(this, unitName, teamColor, isPlayerUnit);
                 yield return new WaitForSeconds(spawnCooldown);
             }
         }
 
         private IEnumerator RespawnUnit(string unitName, bool isPlayer)
         {
+            // TODO: Rework.
             yield return new WaitForSeconds(respawnTimer);
-            // TODO: Update spawn timer on UI.
-            var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
-            Units.Add(unit);
-            unit.Initialize(this, unitName, teamColor, isPlayer);
-            GameController.Instance.RegisterPlayerUnit(unitName, unit);
+            // // TODO: Update spawn timer on UI.
+            // var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
+            // Units.Add(unit);
+            // unit.Initialize(this, unitName, teamColor, isPlayer);
+            // GameController.Instance.RegisterPlayerUnit(unitName, unit);
         }
 
-        public Unit SwapBotForPlayer(string userName)
+        public void SwapBotForPlayer(string userName)
         {
-            if (botUnits.Count == 0) return null;
-            var botId = botUnits[0];
-            botUnits.Remove(botUnits[0]);
+            var unit = Units.FirstOrDefault(x => x.IsPlayer == false);
+            if (unit == null)
+            {
+                Debug.LogError($"{userName} is trying to join {teamName}, but the team is full.");
+                return;
+            }
 
-            Units[botId].SwapBotForPlayer(userName);
-            ui.UpdateUnitName(botId, userName);
-            return Units[botId];
+            unit.SwapBotForPlayer(userName);
+            GameController.Instance.RegisterPlayerUnit(userName, unit);
         }
 
         private void UnitDeathHandler(Unit unit)

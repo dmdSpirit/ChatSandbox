@@ -12,14 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56c5d001c6d72554885f937c53ce1652, type: 3}
   m_Name: Warrior
   m_EditorClassIdentifier: 
-  jobName: Warrior
+  jobType: 1
+  icon: {fileID: 21300000, guid: 82e232c4b7118c044b006d312574bb11, type: 3}
   maxHP: 20
   damage: 4
   attackRange: 1.2
   attackCooldown: 2.5
   aggroRadius: 20
-  moveSpeed: 4
+  idleWalkRadius: {x: 0, y: 0}
+  movementSpeed: 3.5
   canGather: 0
+  gatheringAmount: 0
+  gatheringDistance: 0
+  gatheringCooldown: 0
+  maxCarryingCapacity: 0
   canBuild: 0
+  buildingDistance: 0
+  buildingSpeed: 0
   buildingNeeded: 3
   modelPrefab: {fileID: 0}
