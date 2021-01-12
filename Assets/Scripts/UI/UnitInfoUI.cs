@@ -21,6 +21,7 @@ namespace dmdspirit
             unit.OnUpdateHP += UpdateHpHandler;
             unit.OnOwnerChanged += OwnerChangedHandler;
             unit.OnJobChanged += JobChangedHandler;
+            unit.OnDeath += DeathHandler;
             OwnerChangedHandler();
             JobChangedHandler();
             UpdateHpHandler();
@@ -29,6 +30,8 @@ namespace dmdspirit
             background.color = color;
             carriedResource.Initilaize(unit);
         }
+
+        private void DeathHandler(Unit obj) => unitHPBar.SetProgress(0);
 
         private void OwnerChangedHandler() => unitName.text = unit.name;
         private void UpdateHpHandler() => unitHPBar.SetProgress(unit.HP / unit.CurrentJob.maxHP);

@@ -31,9 +31,22 @@ namespace dmdspirit
         {
             this.unit = unit;
             stateStack = new Stack<State>();
-            var idleState = new IdleState(unit);
-            PushNewStateHandler(idleState);
+            PushNewStateHandler(new IdleState(unit));
             StartSearchingForEnemies();
+            unit.OnDeath += DeathHandler;
+        }
+
+        private void DeathHandler(Unit unit)
+        {
+            StopCurrentState();
+            searchForEnemiesState.StopState();
+            searchForEnemiesState = null;
+        }
+
+        public void Respawn()
+        {
+            StartSearchingForEnemies();
+            PushNewStateHandler(new IdleState(unit));
         }
 
         public void GatherResource(ResourceType resourceType)
@@ -63,7 +76,7 @@ namespace dmdspirit
             PushNewStateHandler(attackState);
         }
 
-        
+
         private void StateFinishHandler(State finishedState)
         {
             // FIXME: Handle potential indefinite loops.
@@ -95,6 +108,12 @@ namespace dmdspirit
         {
             searchForEnemiesState = new SearchForEnemiesState(unit);
             searchForEnemiesState.OnStateFinish += (x) => searchForEnemiesState = null;
+        }
+
+        public void Patrol(MapPosition first, MapPosition? second)
+        {
+            StopCurrentState();
+            PushNewStateHandler(new PatrolState(unit, first, second));
         }
     }
 }

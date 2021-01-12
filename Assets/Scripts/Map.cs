@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace dmdspirit
@@ -74,6 +73,20 @@ namespace dmdspirit
             }
 
             ProcessTiles();
+        }
+
+        public Vector3 GetMapPosition(Vector3 position)
+        {
+            position.y = 5;
+            if (Physics.Raycast(new Ray(position, Vector3.down), out var hit, LayerMask.NameToLayer("Floor")))
+            {
+                var tile = hit.collider.GetComponent<MapTile>();
+                if (tile != null)
+                    return tile.transform.position;
+            }
+
+            Debug.LogError($"Could not find tile for position {position.ToString()}.");
+            return Vector3.zero;
         }
 
         public bool CheckPosition(MapPosition position) => position.x < mapWidth && position.y < mapHeight && position.x >= 0 && position.y >= 0;

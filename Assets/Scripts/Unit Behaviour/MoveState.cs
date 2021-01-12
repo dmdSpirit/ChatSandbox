@@ -29,11 +29,12 @@ namespace dmdspirit
 
         public override void Update()
         {
-            if (agent.path.status == NavMeshPathStatus.PathComplete)
-            {
-                Finish();
-                return;
-            }
+            // 
+            // if (agent.path.status == NavMeshPathStatus.PathComplete)
+            // {
+            //     Finish();
+            //     return;
+            // }
             
             // TODO: Check if the target is reachable.
             if (Vector3.Distance(agent.transform.position, target) > stopDistance) return;

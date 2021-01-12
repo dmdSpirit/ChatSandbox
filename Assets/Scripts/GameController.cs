@@ -44,6 +44,7 @@ namespace dmdspirit
             ChatParser.Instance.OnGatherCommand += GatherCommandHandler;
             ChatParser.Instance.OnBuildCommand += BuildCommandHandler;
             ChatParser.Instance.OnJobCommand += JobCommandHandler;
+            ChatParser.Instance.OnPatrolCommand += PatrolCommandHandler;
             joinTimerCoroutine = StartCoroutine(JoinTimer());
             sessionTimerUI.Hide();
             resultsUI.Hide();
@@ -51,6 +52,12 @@ namespace dmdspirit
             greenTeam.HideUI();
             isSessionRunning = false;
             Map.Instance.StartGame();
+        }
+
+        private void PatrolCommandHandler(string userName, MapPosition firstPosition, MapPosition? secondPosition)
+        {
+            if (playerUnits.ContainsKey(userName) == false) return;
+            playerUnits[userName].Patrol(firstPosition, secondPosition);
         }
 
         private void JobCommandHandler(string userName, UnitJobType jobType)

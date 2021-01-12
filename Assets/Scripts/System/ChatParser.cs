@@ -22,6 +22,7 @@ namespace dmdspirit
             Stone,
             Build,
             Job,
+            Patrol,
             Help
         }
 
@@ -32,6 +33,7 @@ namespace dmdspirit
             public TeamTag teamTag;
             public BuildingType buildingType;
             public MapPosition position;
+            public MapPosition? secondPosition;
             public TileDirection direction;
             public UnitJobType jobType;
         }
@@ -42,6 +44,7 @@ namespace dmdspirit
         public event Action<string, ResourceType> OnGatherCommand;
         public event Action<string, BuildingType, MapPosition, TileDirection> OnBuildCommand;
         public event Action<string, UnitJobType> OnJobCommand;
+        public event Action<string, MapPosition, MapPosition?> OnPatrolCommand;
 
         private struct Message
         {
@@ -94,6 +97,9 @@ namespace dmdspirit
                     case ChatCommands.Job:
                         OnJobCommand?.Invoke(command.user, command.jobType);
                         break;
+                    case ChatCommands.Patrol:
+                        OnPatrolCommand?.Invoke(command.user, command.position, command.secondPosition);
+                        break;
                 }
             }
 
@@ -105,31 +111,32 @@ namespace dmdspirit
             Debug.Log($"Command: ({e.Command.CommandText}) and args: ({string.Join(",", e.Command.ArgumentsAsList)})");
             // FIXME: Should this return "error message" to chat?
             if (Enum.TryParse<ChatCommands>(e.Command.CommandText, true, out var command) == false) return;
+            var args = e.Command.ArgumentsAsList;
+            var userName = e.Command.ChatMessage.DisplayName;
             switch (command)
             {
                 case ChatCommands.Join:
                     // FIXME: Ugly.
-                    if (e.Command.ArgumentsAsList.Count > 0 && Enum.TryParse<TeamTag>(e.Command.ArgumentsAsList[0].ToString(), true, out var teamTag))
-                        commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Join, teamTag = teamTag});
+                    if (args.Count > 0 && Enum.TryParse<TeamTag>(args[0].ToString(), true, out var teamTag))
+                        commandList.Add(new Command() {user = userName, commandType = ChatCommands.Join, teamTag = teamTag});
                     else
-                        commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Join, teamTag = TeamTag.None});
+                        commandList.Add(new Command() {user = userName, commandType = ChatCommands.Join, teamTag = TeamTag.None});
                     return;
                 case ChatCommands.Wood:
-                    commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Wood});
+                    commandList.Add(new Command() {user = userName, commandType = ChatCommands.Wood});
                     break;
                 case ChatCommands.Stone:
-                    commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Stone});
+                    commandList.Add(new Command() {user = userName, commandType = ChatCommands.Stone});
                     break;
                 case ChatCommands.Help:
                     client.SendMessage(e.Command.ChatMessage.Channel, $"List of commands: {GetCommandList()}");
                     break;
                 case ChatCommands.Build:
-                    var args = e.Command.ArgumentsAsList;
                     if (args.Count >= 2 &&
                         MapPosition.TryParse(args[0], out var mapPosition) &&
                         Enum.TryParse<BuildingType>(args[1], true, out var buildingType))
                     {
-                        var newCommand = new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Build, buildingType = buildingType, position = mapPosition};
+                        var newCommand = new Command() {user = userName, commandType = ChatCommands.Build, buildingType = buildingType, position = mapPosition};
                         if (args.Count > 2 && Enum.TryParse<TileDirection>(args[2], true, out var direction))
                             newCommand.direction = direction;
                         commandList.Add(newCommand);
@@ -137,9 +144,17 @@ namespace dmdspirit
 
                     break;
                 case ChatCommands.Job:
-                    if (e.Command.ArgumentsAsList.Count < 1 || Enum.TryParse<UnitJobType>(e.Command.ArgumentsAsList[0],true, out var jobType) == false) break;
-                    commandList.Add(new Command() {user = e.Command.ChatMessage.DisplayName, commandType = ChatCommands.Job, jobType = jobType});
+                    if (args.Count < 1 || Enum.TryParse<UnitJobType>(e.Command.ArgumentsAsList[0], true, out var jobType) == false) break;
+                    commandList.Add(new Command() {user = userName, commandType = ChatCommands.Job, jobType = jobType});
 
+                    break;
+                case ChatCommands.Patrol:
+                    // 1 or 2 args. if only one => patrol between current position and target
+                    if (args.Count < 1 || MapPosition.TryParse(args[0], out var firstPosition) == false) return;
+                    var patrolCommand = new Command(){user = userName, commandType = ChatCommands.Patrol, position = firstPosition};
+                    if (args.Count >= 2 && MapPosition.TryParse(args[1], out var secondPosition))
+                        patrolCommand.secondPosition = secondPosition;
+                    commandList.Add(patrolCommand);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

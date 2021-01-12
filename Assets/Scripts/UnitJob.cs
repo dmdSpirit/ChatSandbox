@@ -31,5 +31,6 @@ namespace dmdspirit
         public float buildingSpeed;
         public BuildingType buildingNeeded;
         public GameObject modelPrefab;
+        public bool canPatrol;
     }
 }

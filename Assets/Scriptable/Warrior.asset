@@ -31,3 +31,4 @@ MonoBehaviour:
   buildingSpeed: 0
   buildingNeeded: 3
   modelPrefab: {fileID: 0}
+  canPatrol: 1

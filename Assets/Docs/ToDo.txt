@@ -1,61 +1,41 @@
-﻿v2 14.12.2020  
-+ Join current session if there are any bots left.
-+ Change team on join  
-+ Unit name plates for users
-+ Unit behaviour
-    + Behaviour state machine
-    + Wondering around on idle state
-    + Resource gathering loop
-+ Map grid
-+ Bots try to gather random resource instead of just wondering around when in idle state.
-+ Building
-    + Tower
-    + !build a2 command
-    + Building progress bar
-    + Barracks
-+ Combat
-    + Unit agro range
-    + Unit fighting
-    + Tower attacking enemies
-    + Tower attack radius
-    + Unit hp bar
-+ Jobs
-    + Warrior
-    + Worker
-    + Icons
-    + Change job
-- Unit respawn
-- !patrol a1 z9
-- Show resource icon if unit is carrying something
-- Show current task icon or visualize path
+﻿v3 (building) 13.01.2021
+
+- !build 'where' 'what' 'direction'
+- Finish building site that was left by builder
+- Units can attack buildings
+- Update win condition
+- Repair
+- building site (units have to carry resources needed for building to the building site to finish building)
+- build zone (sc pylon or radius around any building)
+- Commands for bots (specify a sector to work in)
+- !move a2
+- Workers move slower with resources
+- Unit regeneration
+- Respawn timer
+- Different speed for idle walking, chasing and so on
+- For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
+    - Fix getting stuck when trying to patrol tile with base building
+- Rework test map
+- Test for 10-15 units in team
+
+--------------------------
 - Gameplay footage 
 
 ------------------------------
 Future:
-- Finish building site that was left by builder
-- Update win condition
-- Units can attack buildings
-- Repair
+- Rage attacks and jobs (mage/archer)
+- More verbose help
 - Bots getting stuck in the building while idle walking
-- Update players UI
-- building site (units have to carry resources needed for building to the building site to finish building)
-- !build 'where' 'what' 'direction'
-- build zone (sc pylon or radius around any building)
 - BAN LIST
 - Figure a way to remove units collision with each other
 - Map generation
 - User database
     - user id consistency
 - !kill userName (attack userName if unit is found in agro radius)
-- Commands for bots (specify a sector to work in)
 - Plant trees
-- !move a2
 - after v3-4 refactor and solve all //TODO:s
-- Workers move slower with resources
-- Unit regeneration
 - Stop using NavMesh. (Check Pathfinder: Kingmaker game code for other navigation system)
-- Different speed for idle walking, chasing and so on
-- For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
+- Show current task icon or visualize path
 
 ------------------------------
 ------------------------------
@@ -88,3 +68,35 @@ v1 11.12.2020
 + Unit control
     + !wood
     + !stone
+
+
+v2 14.12.2020  (war)
+
++ Join current session if there are any bots left.
++ Change team on join  
++ Unit name plates for users
++ Unit behaviour
+    + Behaviour state machine
+    + Wondering around on idle state
+    + Resource gathering loop
++ Map grid
++ Bots try to gather random resource instead of just wondering around when in idle state.
++ Building
+    + Tower
+    + !build a2 command
+    + Building progress bar
+    + Barracks
++ Combat
+    + Unit agro range
+    + Unit fighting
+    + Tower attacking enemies
+    + Tower attack radius
+    + Unit hp bar
++ Jobs
+    + Warrior
+    + Worker
+    + Icons
+    + Change job
++ Show resource icon if unit is carrying something
++ !patrol a1 z9
++ Unit respawn

@@ -49,7 +49,6 @@ namespace dmdspirit
 
         public void AddResource(ResourceValue value)
         {
-            Debug.Log($"Resource added to {teamName} team: ({value.type}, {value.value}).");
             storedResources.AddResources(value);
             OnResourceChange?.Invoke();
         }
@@ -93,15 +92,13 @@ namespace dmdspirit
             }
         }
 
-        private IEnumerator RespawnUnit(string unitName, bool isPlayer)
+        private IEnumerator RespawnUnit(Unit unit)
         {
-            // TODO: Rework.
             yield return new WaitForSeconds(respawnTimer);
-            // // TODO: Update spawn timer on UI.
-            // var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
-            // Units.Add(unit);
-            // unit.Initialize(this, unitName, teamColor, isPlayer);
-            // GameController.Instance.RegisterPlayerUnit(unitName, unit);
+            // TODO: Update spawn timer on
+            unit.transform.position = baseBuilding.entrance.position;
+            unit.gameObject.SetActive(true);
+            unit.Respawn();
         }
 
         public void SwapBotForPlayer(string userName)
@@ -119,8 +116,8 @@ namespace dmdspirit
 
         private void UnitDeathHandler(Unit unit)
         {
-            Units.Remove(unit);
-            StartCoroutine(RespawnUnit(unit.name, unit.IsPlayer));
+            unit.gameObject.SetActive(false);
+            StartCoroutine(RespawnUnit(unit));
         }
     }
 }

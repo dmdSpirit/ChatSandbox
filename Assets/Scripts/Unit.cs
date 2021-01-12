@@ -63,6 +63,13 @@ namespace dmdspirit
             unitBehaviour.Initialize(this);
         }
 
+        public void Respawn()
+        {
+            HP = CurrentJob.maxHP;
+            OnUpdateHP?.Invoke();
+            unitBehaviour.Respawn();
+        }
+
         public void SwapBotForPlayer(string playerName)
         {
             IsPlayer = true;
@@ -171,6 +178,12 @@ namespace dmdspirit
             var value = HP / CurrentJob.maxHP;
             hpBar.gameObject.SetActive(value != 1);
             hpBar.SetProgress(value);
+        }
+
+        public void Patrol(MapPosition first, MapPosition? second)
+        {
+            if (CurrentJob.canPatrol == false) return;
+            unitBehaviour.Patrol(first, second);
         }
     }
 }
