@@ -5,7 +5,7 @@ namespace dmdspirit
 {
     public class Barracks : Building
     {
-        [SerializeField] private ResourceCost warriorCost;
+        [SerializeField] private ResourceCollection warriorCollection;
         
         private void Awake()
         {

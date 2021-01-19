@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -39,12 +41,7 @@ namespace dmdspirit
             redTeamPlayers = new List<string>();
             greenTeamPlayers = new List<string>();
             playerUnits = new Dictionary<string, Unit>();
-            // Start gathering users who want to !join.
-            ChatParser.Instance.OnUserJoin += UserJoinHandler;
-            ChatParser.Instance.OnGatherCommand += GatherCommandHandler;
-            ChatParser.Instance.OnBuildCommand += BuildCommandHandler;
-            ChatParser.Instance.OnJobCommand += JobCommandHandler;
-            ChatParser.Instance.OnPatrolCommand += PatrolCommandHandler;
+            ChatParser.Instance.OnCommand += ChatCommandHandler;
             joinTimerCoroutine = StartCoroutine(JoinTimer());
             sessionTimerUI.Hide();
             resultsUI.Hide();
@@ -54,34 +51,47 @@ namespace dmdspirit
             Map.Instance.StartGame();
         }
 
-        private void PatrolCommandHandler(string userName, MapPosition firstPosition, MapPosition? secondPosition)
+        private void ChatCommandHandler(ChatParser.Command command)
         {
-            if (playerUnits.ContainsKey(userName) == false) return;
-            playerUnits[userName].Patrol(firstPosition, secondPosition);
-        }
-
-        private void JobCommandHandler(string userName, UnitJobType jobType)
-        {
-            if (playerUnits.ContainsKey(userName) == false) return;
-            playerUnits[userName].CommandToChangeJob(jobType);
+            Unit unit=null;
+            if (command.commandType != ChatParser.ChatCommands.Join)
+            {
+                if (playerUnits.ContainsKey(command.user))
+                    unit = playerUnits[command.user];
+                else
+                    return;
+            }
+            
+            switch (command.commandType)
+            {
+                case ChatParser.ChatCommands.Join:
+                    JoinUser(command.user, command.teamTag);
+                    break;
+                case ChatParser.ChatCommands.Bot:
+                    break;
+                case ChatParser.ChatCommands.Gather:
+                    unit.GatherResource(command.resourceType);
+                    break;
+                case ChatParser.ChatCommands.Build:
+                    unit.Build(command.buildingType, command.position, command.direction);
+                    break;
+                case ChatParser.ChatCommands.Job:
+                    unit.CommandToChangeJob(command.jobType);
+                    break;
+                case ChatParser.ChatCommands.Patrol:
+                    unit.Patrol(command.position, command.secondPosition);
+                    break;
+                case ChatParser.ChatCommands.Move:
+                    unit.Move(command.position);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public Team GetEnemyTeam(Team team) => team == redTeam ? greenTeam : redTeam;
 
-        private void BuildCommandHandler(string userName, BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
-        {
-            if (playerUnits.ContainsKey(userName) == false) return;
-            playerUnits[userName].Build(buildingType, mapPosition, direction);
-        }
-
-
-        private void GatherCommandHandler(string userName, ResourceType resourceType)
-        {
-            if (playerUnits.ContainsKey(userName) == false) return;
-            playerUnits[userName].GatherResource(resourceType);
-        }
-
-        private void UserJoinHandler(string userName, TeamTag teamTag)
+        private void JoinUser(string userName, TeamTag teamTag)
         {
             if (isSessionRunning == false && teamTag != TeamTag.None)
             {
@@ -141,7 +151,7 @@ namespace dmdspirit
         private void ShowResults()
         {
             Debug.Log("Game Ended. Show results.");
-            resultsUI.Show(greenTeam.storedResources.stone, greenTeam.storedResources.wood, redTeam.storedResources.stone, redTeam.storedResources.wood);
+            resultsUI.Show();
         }
 
         private IEnumerator JoinTimer()
@@ -173,11 +183,6 @@ namespace dmdspirit
             }
 
             ShowResults();
-        }
-
-        public void AddPlayer(TeamTag teamTag = TeamTag.None)
-        {
-            UserJoinHandler(string.Concat("testUser", Random.Range(0, 100).ToString()), teamTag);
         }
 
         public void RegisterPlayerUnit(string player, Unit unit)

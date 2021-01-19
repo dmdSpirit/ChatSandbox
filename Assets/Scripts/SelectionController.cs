@@ -26,7 +26,7 @@ namespace dmdspirit
         {
         }
 
-        private void GatherCommandHandler(Resource resource)
+        private void GatherCommandHandler(ResourceNode resourceNode)
         {
         }
 

@@ -14,19 +14,20 @@ namespace dmdspirit
 {
     public class ChatParser : MonoSingleton<ChatParser>
     {
-        private enum ChatCommands
+        public enum ChatCommands
         {
             None,
             Join,
-            Wood,
-            Stone,
-            Build,
-            Job,
-            Patrol,
-            Help
+            Help,
+            Bot,
+            Gather, // !g
+            Build, // !b
+            Job, // !j
+            Patrol, // !p
+            Move, // !m
         }
 
-        private struct Command
+        public struct Command
         {
             public string user;
             public ChatCommands commandType;
@@ -36,15 +37,11 @@ namespace dmdspirit
             public MapPosition? secondPosition;
             public TileDirection direction;
             public UnitJobType jobType;
+            public int botIndex;
+            public ResourceType resourceType;
         }
-
-        public event Action<string, TeamTag> OnUserJoin;
-
-        // FIXME: Should be separate entity, parsing all commands using ingame logic.
-        public event Action<string, ResourceType> OnGatherCommand;
-        public event Action<string, BuildingType, MapPosition, TileDirection> OnBuildCommand;
-        public event Action<string, UnitJobType> OnJobCommand;
-        public event Action<string, MapPosition, MapPosition?> OnPatrolCommand;
+        
+        public event Action<Command> OnCommand;
 
         private struct Message
         {
@@ -79,86 +76,137 @@ namespace dmdspirit
         private void Update()
         {
             foreach (var command in commandList)
+                OnCommand?.Invoke(command);
+            commandList.Clear();
+        }
+
+        private bool TryParseChatCommand(string command, out ChatCommands chatCommand)
+        {
+            // IMPROVE: Ugly.
+            switch (command.ToLower().Trim())
             {
-                switch (command.commandType)
-                {
-                    case ChatCommands.Join:
-                        OnUserJoin?.Invoke(command.user, command.teamTag);
-                        break;
-                    case ChatCommands.Wood:
-                    case ChatCommands.Stone:
-                        var resourceType = command.commandType == ChatCommands.Stone ? ResourceType.Stone : ResourceType.Wood;
-                        OnGatherCommand?.Invoke(command.user, resourceType);
-                        break;
-                    case ChatCommands.Build:
-                        if (Map.Instance.CheckPosition(command.position))
-                            OnBuildCommand?.Invoke(command.user, command.buildingType, command.position, command.direction);
-                        break;
-                    case ChatCommands.Job:
-                        OnJobCommand?.Invoke(command.user, command.jobType);
-                        break;
-                    case ChatCommands.Patrol:
-                        OnPatrolCommand?.Invoke(command.user, command.position, command.secondPosition);
-                        break;
-                }
+                case "g":
+                    command = "gather";
+                    break;
+                case "b":
+                    command = "build";
+                    break;
+                case "j":
+                    command = "job";
+                    break;
+                case "p":
+                    command = "patrol";
+                    break;
+                case "m":
+                    command = "move";
+                    break;
             }
 
-            commandList.Clear();
+            return Enum.TryParse<ChatCommands>(command, true, out chatCommand);
         }
 
         private void ChatCommandReceivedHandler(object sender, OnChatCommandReceivedArgs e)
         {
-            Debug.Log($"Command: ({e.Command.CommandText}) and args: ({string.Join(",", e.Command.ArgumentsAsList)})");
-            // FIXME: Should this return "error message" to chat?
-            if (Enum.TryParse<ChatCommands>(e.Command.CommandText, true, out var command) == false) return;
-            var args = e.Command.ArgumentsAsList;
             var userName = e.Command.ChatMessage.DisplayName;
+            if (TryParseChatCommand(e.Command.CommandText, out var command) == false)
+            {
+                Debug.LogError($"Could not parse chat command {userName}: {e.Command.CommandText}");
+                return;
+            }
+
+            var args = e.Command.ArgumentsAsList;
             switch (command)
             {
                 case ChatCommands.Join:
-                    // FIXME: Ugly.
-                    if (args.Count > 0 && Enum.TryParse<TeamTag>(args[0].ToString(), true, out var teamTag))
-                        commandList.Add(new Command() {user = userName, commandType = ChatCommands.Join, teamTag = teamTag});
-                    else
-                        commandList.Add(new Command() {user = userName, commandType = ChatCommands.Join, teamTag = TeamTag.None});
-                    return;
-                case ChatCommands.Wood:
-                    commandList.Add(new Command() {user = userName, commandType = ChatCommands.Wood});
+                    if (TryParseJoinCommand(userName, args, out var joinCommand))
+                        commandList.Add(joinCommand);
                     break;
-                case ChatCommands.Stone:
-                    commandList.Add(new Command() {user = userName, commandType = ChatCommands.Stone});
+                case ChatCommands.Gather:
+                    if (TryParseGatherCommand(userName, args, out var gatherCommand))
+                        commandList.Add(gatherCommand);
                     break;
                 case ChatCommands.Help:
-                    client.SendMessage(e.Command.ChatMessage.Channel, $"List of commands: {GetCommandList()}");
+                    ParseHelpCommand(userName, args, e.Command.ChatMessage.Channel);
                     break;
                 case ChatCommands.Build:
-                    if (args.Count >= 2 &&
-                        MapPosition.TryParse(args[0], out var mapPosition) &&
-                        Enum.TryParse<BuildingType>(args[1], true, out var buildingType))
-                    {
-                        var newCommand = new Command() {user = userName, commandType = ChatCommands.Build, buildingType = buildingType, position = mapPosition};
-                        if (args.Count > 2 && Enum.TryParse<TileDirection>(args[2], true, out var direction))
-                            newCommand.direction = direction;
-                        commandList.Add(newCommand);
-                    }
-
+                    if (TryParseBuildCommand(userName, args, out var buildCommand))
+                        commandList.Add(buildCommand);
                     break;
                 case ChatCommands.Job:
-                    if (args.Count < 1 || Enum.TryParse<UnitJobType>(e.Command.ArgumentsAsList[0], true, out var jobType) == false) break;
-                    commandList.Add(new Command() {user = userName, commandType = ChatCommands.Job, jobType = jobType});
-
+                    if (TryParseJobCommand(userName, args, out var jobCommand))
+                        commandList.Add(jobCommand);
                     break;
                 case ChatCommands.Patrol:
-                    // 1 or 2 args. if only one => patrol between current position and target
-                    if (args.Count < 1 || MapPosition.TryParse(args[0], out var firstPosition) == false) return;
-                    var patrolCommand = new Command(){user = userName, commandType = ChatCommands.Patrol, position = firstPosition};
-                    if (args.Count >= 2 && MapPosition.TryParse(args[1], out var secondPosition))
-                        patrolCommand.secondPosition = secondPosition;
-                    commandList.Add(patrolCommand);
+                    if (TryParsePatrolCommand(userName, args, out var patrolCommand))
+                        commandList.Add(patrolCommand);
+                    break;
+                case ChatCommands.Move:
+                    if (TryParseMoveCommand(userName, args, out var moveCommand))
+                        commandList.Add(moveCommand);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void ParseHelpCommand(string userName, List<string> args, string channel)
+        {
+            // TODO: Improve help command (!help build)
+            client.SendMessage(channel, $"List of commands: {GetCommandList()}");
+        }
+
+        // !join red, !join
+        private bool TryParseJoinCommand(string userName, List<string> args, out Command command)
+        {
+            command = new Command() {user = userName, commandType = ChatCommands.Gather, teamTag = TeamTag.None};
+            if (args.Count > 0 && Enum.TryParse<TeamTag>(args[0], true, out var teamTag))
+                command.teamTag = teamTag;
+            return true;
+        }
+
+        // !gather wood
+        private bool TryParseGatherCommand(string userName, List<string> args, out Command command)
+        {
+            command = new Command() {user = userName, commandType = ChatCommands.Gather};
+            return args.Count >= 1 && Enum.TryParse<ResourceType>(args[0], true, out command.resourceType);
+        }
+
+        // !build a2 tower left, !build a2 tower, !build a2
+        private bool TryParseBuildCommand(string userName, List<string> args, out Command command)
+        {
+            command = new Command() {user = userName, commandType = ChatCommands.Build};
+            if (args.Count < 1 || MapPosition.TryParse(args[0], out command.position) == false) return false;
+            if (args.Count > 1 && Enum.TryParse<BuildingType>(args[1], true, out var buildingType))
+                command.buildingType = buildingType;
+            if (args.Count > 2 && Enum.TryParse<TileDirection>(args[2], true, out var direction))
+                command.direction = direction;
+            return true;
+        }
+
+        // !job warrior
+        private bool TryParseJobCommand(string userName, List<string> args, out Command command)
+        {
+            command = new Command() {user = userName, commandType = ChatCommands.Job};
+            return args.Count >= 1 && Enum.TryParse<UnitJobType>(args[0], true, out command.jobType);
+        }
+
+        // !patrol a2 b2, !patrol a2
+        private bool TryParsePatrolCommand(string userName, List<string> args, out Command command)
+        {
+            command = new Command() {user = userName, commandType = ChatCommands.Patrol};
+            // 1 or 2 args. if only one => patrol between current position and target
+            if (args.Count < 1 || MapPosition.TryParse(args[0], out var firstPosition) == false) return false;
+            command.position = firstPosition;
+            if (args.Count >= 2 && MapPosition.TryParse(args[1], out var secondPosition))
+                command.secondPosition = secondPosition;
+            return true;
+        }
+
+        // !move a2
+        private bool TryParseMoveCommand(string userName, List<string> args, out Command command)
+        {
+            command = new Command() {user = userName, commandType = ChatCommands.Move};
+            return args.Count >= 1 && MapPosition.TryParse(args[0], out command.position);
         }
 
         private string GetCommandList() => string.Join(", ", ((from ChatCommands command in Enum.GetValues(typeof(ChatCommands)) where excludedCommands.Contains(command) == false select string.Concat("!", command.ToString().ToLower()))));

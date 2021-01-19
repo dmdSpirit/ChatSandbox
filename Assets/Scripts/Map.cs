@@ -35,7 +35,7 @@ namespace dmdspirit
 
     public class Map : MonoSingleton<Map>
     {
-        public Dictionary<ResourceType, List<Resource>> resources { get; protected set; }
+        public Dictionary<ResourceType, List<ResourceNode>> resources { get; protected set; }
 
         private MapTile[,] mapTiles;
         private List<MapTile> tiles;
@@ -44,11 +44,11 @@ namespace dmdspirit
 
         private void Awake()
         {
-            resources = new Dictionary<ResourceType, List<Resource>>();
+            resources = new Dictionary<ResourceType, List<ResourceNode>>();
             foreach (ResourceType resourceType in Enum.GetValues(typeof(ResourceType)))
             {
                 if (resourceType == ResourceType.None) continue;
-                resources.Add(resourceType, new List<Resource>());
+                resources.Add(resourceType, new List<ResourceNode>());
             }
 
             tiles = new List<MapTile>();
@@ -65,7 +65,7 @@ namespace dmdspirit
 
         public void StartGame()
         {
-            var resourceObjects = FindObjectsOfType<Resource>();
+            var resourceObjects = FindObjectsOfType<ResourceNode>();
             foreach (var resource in resourceObjects)
             {
                 resources[resource.value.type].Add(resource);
@@ -112,9 +112,9 @@ namespace dmdspirit
                 mapTiles[tile.Position.x, tile.Position.y] = tile;
         }
 
-        private void ResourceDepletedHandler(Resource resource)
+        private void ResourceDepletedHandler(ResourceNode resourceNode)
         {
-            resources[resource.value.type].Remove(resource);
+            resources[resourceNode.value.type].Remove(resourceNode);
         }
     }
 }

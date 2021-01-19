@@ -2,12 +2,20 @@
 
 namespace dmdspirit
 {
+    public enum BuildingType
+    {
+        None,
+        Base,
+        Tower,
+        Barracks
+    }
+    
     public class Building : MonoBehaviour
     {
         [SerializeField] private Renderer[] renderers;
 
         public Transform entrance;
-        public ResourceCost cost;
+        public ResourceCollection cost;
         public float buildingPointsCost;
         public BuildingType type;
 

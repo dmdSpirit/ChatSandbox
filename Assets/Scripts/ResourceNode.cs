@@ -4,26 +4,11 @@ using Random = UnityEngine.Random;
 
 namespace dmdspirit
 {
-    public enum ResourceType
+    public class ResourceNode : MonoBehaviour
     {
-        None,
-        Wood,
-        Stone
-    }
+        public event Action<ResourceNode> OnResourceDepleted;
 
-    [Serializable]
-    public struct ResourceValue
-    {
-        public ResourceType type;
-        // TODO: All resource values should be int.
-        public int value;
-    }
-
-    public class Resource : MonoBehaviour
-    {
-        public event Action<Resource> OnResourceDepleted;
-
-        public ResourceValue value;
+        public Resource value;
 
         private void Start()
         {

@@ -65,6 +65,7 @@ namespace dmdspirit
         public void Build(BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
         {
             StopCurrentState();
+            // TODO: Check if buildingType is specified or if there is a construction site.
             var buildState = new BuildState(unit, Map.Instance.GetTile(mapPosition), buildingType, direction);
             PushNewStateHandler(buildState);
         }
@@ -114,6 +115,12 @@ namespace dmdspirit
         {
             StopCurrentState();
             PushNewStateHandler(new PatrolState(unit, first, second));
+        }
+
+        public void Move(MapPosition position)
+        {
+            StopCurrentState();
+            PushNewStateHandler(new MoveState(unit, Map.Instance.GetTile(position).transform.position, 1.5f));
         }
     }
 }

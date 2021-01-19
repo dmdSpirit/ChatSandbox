@@ -9,7 +9,7 @@ namespace dmdspirit
     {
         public event Action<Unit> OnUnitSelected;
         public event Action<Vector3> OnMoveCommand;
-        public event Action<Resource> OnGatherCommand;
+        public event Action<ResourceNode> OnGatherCommand;
         public event Action<ResourceType> OnFindAndGatherCommand;
 
         [SerializeField] private LayerMask floorAndResourceMask;
@@ -50,7 +50,7 @@ namespace dmdspirit
             var ray = Camera.main.ScreenPointToRay(position);
             if (Physics.Raycast(ray, out var hit, 1000, floorAndResourceMask))
             {
-                var resource = hit.collider.GetComponent<Resource>();
+                var resource = hit.collider.GetComponent<ResourceNode>();
                 if (resource == null)
                     OnMoveCommand?.Invoke(hit.point);
                 else

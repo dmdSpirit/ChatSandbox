@@ -3,22 +3,13 @@ using UnityEngine.AI;
 
 namespace dmdspirit
 {
-    // TODO: Move enum somewhere else (BuildingController?)
-    public enum BuildingType
-    {
-        None,
-        Base,
-        Tower,
-        Barracks
-    }
-
     public class BuildState : State
     {
         private Unit unit;
         private MapTile targetTile;
         private BuildingType buildingType;
         private TileDirection direction;
-        private BuildingSite buildingSite;
+        private ConstructionSite constructionSite;
 
         private float BuildingDistance => unit.CurrentJob.buildingDistance;
         private float BuildingSpeed => unit.CurrentJob.buildingSpeed;
@@ -47,7 +38,7 @@ namespace dmdspirit
                 return;
             }
 
-            if (buildingSite == null)
+            if (constructionSite == null)
             {
                 if (targetTile.isEmpty == false)
                 {
@@ -61,20 +52,20 @@ namespace dmdspirit
                     return;
 
                 Debug.Log($"{unit.name} has started building {buildingType.ToString()}.");
-                buildingSite = BuildingController.Instance.CreateBuildingSite(unit.UnitTeam, buildingType, targetTile, direction);
-                buildingSite.OnBuildingComplete += BuildingCompleteHandler;
+                constructionSite = BuildingController.Instance.CreateConstructionSite(unit.UnitTeam, buildingType, targetTile, direction);
+                // buildingSite.OnBuildingComplete += BuildingCompleteHandler;
                 unit.UnitTeam.SpendResources(cost);
                 return;
             }
 
-            buildingSite.AddBuildingPoints(BuildingSpeed * Time.deltaTime);
+            constructionSite.AddBuildingPoints(BuildingSpeed * Time.deltaTime);
         }
 
-        private void BuildingCompleteHandler()
-        {
-            Debug.Log($"{unit.name} has completed building {buildingType.ToString()}.");
-            unit.UnitTeam.AddBuilding(buildingSite);
-            StopState();
-        }
+        // private void BuildingCompleteHandler()
+        // {
+        //     Debug.Log($"{unit.name} has completed building {buildingType.ToString()}.");
+        //     unit.UnitTeam.AddBuilding(buildingSite);
+        //     StopState();
+        // }
     }
 }

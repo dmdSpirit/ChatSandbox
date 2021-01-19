@@ -30,8 +30,8 @@ namespace dmdspirit
 
         private void ResourceChangeHandler()
         {
-            woodValue.text = team.storedResources.wood.ToString();
-            stoneValue.text = team.storedResources.stone.ToString();
+            woodValue.text = team.storedResources.GetResourceValue(ResourceType.Wood).ToString();
+            stoneValue.text = team.storedResources.GetResourceValue(ResourceType.Stone).ToString();
         }
     }
 }

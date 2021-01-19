@@ -15,7 +15,7 @@ namespace dmdspirit
         public Color teamColor = Color.green;
         public string teamName = "team";
         public BaseBuilding baseBuilding = default;
-        public ResourceCost storedResources;
+        public ResourceCollection storedResources;
 
         [SerializeField] private TeamUI ui;
         [SerializeField] private Unit unitPrefab = default;
@@ -24,7 +24,9 @@ namespace dmdspirit
 
         public List<Unit> Units { get; private set; }
 
+        
         private List<Building> buildings;
+        private List<ConstructionSite> buildingSites;
 
         private void Start()
         {
@@ -36,35 +38,46 @@ namespace dmdspirit
         public void Initialize(List<string> players, int maxUnitCount)
         {
             buildings = new List<Building>();
+            buildingSites = new List<ConstructionSite>();
             buildings.Add(baseBuilding);
             StartCoroutine(SpawnUnits(players, maxUnitCount));
             ui.gameObject.SetActive(true);
-            storedResources = new ResourceCost();
+            storedResources = new ResourceCollection();
             ui.Initialize(this);
+        }
+        
+        public void AddBuildingSite(ConstructionSite constructionSite)
+        {
+            buildingSites.Add(constructionSite);
+            constructionSite.OnBuildingSiteFinished += BuildingSiteFinishedHandler;
+        }
+
+        private void BuildingSiteFinishedHandler(ConstructionSite constructionSite)
+        {
+            buildingSites.Remove(constructionSite);
         }
 
         public List<Building> GetBuildingsOfType(BuildingType type) => buildings.Where(x => x.type == type).ToList();
 
         public bool CheckHasBuilding(BuildingType type) => buildings.Any(x => x.type == type);
 
-        public void AddResource(ResourceValue value)
+        public void AddResource(Resource value)
         {
             storedResources.AddResources(value);
             OnResourceChange?.Invoke();
         }
 
-        public void SpendResources(ResourceCost cost)
+        public void SpendResources(ResourceCollection collection)
         {
-            storedResources.SpendResource(cost);
+            storedResources.TrySpendResource(collection);
             OnResourceChange?.Invoke();
         }
 
-        // IMPROVE: Add on creation of building site.
-        public void AddBuilding(BuildingSite buildingSite)
+        public void AddBuilding(ConstructionSite constructionSite)
         {
-            var building = buildingSite.Building;
+            var building = constructionSite.Building;
             buildings.Add(building);
-            buildingSite.DestroySite();
+            constructionSite.DestroySite();
         }
 
         private IEnumerator SpawnUnits(List<string> players, int maxUnitCount)

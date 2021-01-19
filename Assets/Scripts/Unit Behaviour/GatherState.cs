@@ -6,7 +6,7 @@ namespace dmdspirit
     public class GatherState : State
     {
         private Unit unit;
-        private Resource target;
+        private ResourceNode target;
         private ResourceType resourceType;
         private float gatheringTimer = 0f;
 

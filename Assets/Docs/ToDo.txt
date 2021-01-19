@@ -1,17 +1,23 @@
-﻿v3 (building) 13.01.2021
+﻿v3 (building) 18.01.2021
 
-- !build 'where' 'what' 'direction'
++ !move a2
++ !build 'where' 'what' 'direction'
+- building site (units have to carry resources needed for building to the building site to finish building)
+- Update commands
+    - !build a2 (takes 1 parameter and commands unit to work on construction site in a2 if there is any)
+- Commands for bots (specify a sector to work in)
+    - !bot team index command
+    - !bot team index build a2
+- fix: Build site progress bar is rotated with the bulding
+- build zone (sc pylon or radius around any building)
 - Finish building site that was left by builder
 - Units can attack buildings
-- Update win condition
 - Repair
-- building site (units have to carry resources needed for building to the building site to finish building)
-- build zone (sc pylon or radius around any building)
-- Commands for bots (specify a sector to work in)
-- !move a2
+- Update win condition
+- Rework ResultsUI
 - Workers move slower with resources
 - Unit regeneration
-- Respawn timer
+- Respawn timer UI
 - Different speed for idle walking, chasing and so on
 - For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
     - Fix getting stuck when trying to patrol tile with base building
@@ -23,10 +29,13 @@
 
 ------------------------------
 Future:
+- Bot units get commands from the team priority list (get resources/build).
+- Chat command errors.
 - Rage attacks and jobs (mage/archer)
 - More verbose help
 - Bots getting stuck in the building while idle walking
 - BAN LIST
+- Unit should be able override delivery if it has resources needed right now.
 - Figure a way to remove units collision with each other
 - Map generation
 - User database
@@ -36,6 +45,7 @@ Future:
 - after v3-4 refactor and solve all //TODO:s
 - Stop using NavMesh. (Check Pathfinder: Kingmaker game code for other navigation system)
 - Show current task icon or visualize path
+- Rework unit/unitBehaviour classes and chat commands.
 
 ------------------------------
 ------------------------------

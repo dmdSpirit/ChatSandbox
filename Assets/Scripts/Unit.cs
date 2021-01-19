@@ -24,7 +24,7 @@ namespace dmdspirit
 
         [SerializeField] private UnitJob[] jobs;
 
-        public ResourceValue carriedResource;
+        public Resource carriedResource;
 
         public bool IsAlive => HP > 0;
         public bool IsPlayer { get; private set; }
@@ -40,7 +40,7 @@ namespace dmdspirit
         {
             unitBehaviour = GetComponent<UnitBehaviour>();
             Agent = GetComponent<NavMeshAgent>();
-            carriedResource = new ResourceValue();
+            carriedResource = new Resource();
         }
 
         private void Update()
@@ -184,6 +184,11 @@ namespace dmdspirit
         {
             if (CurrentJob.canPatrol == false) return;
             unitBehaviour.Patrol(first, second);
+        }
+
+        public void Move(MapPosition position)
+        {
+            unitBehaviour.Move(position);
         }
     }
 }

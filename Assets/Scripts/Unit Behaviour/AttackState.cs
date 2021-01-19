@@ -17,6 +17,7 @@ namespace dmdspirit
 
         public AttackState(Unit unit, Unit target)
         {
+            // BUG: Units are constantly starting attackState while in combat. 
             this.unit = unit;
             Debug.Log($"{unit.name} started attacking {target.name}.");
             this.target = target;
