@@ -392,9 +392,9 @@ MonoBehaviour:
   - {fileID: 9190445831131405558}
   - {fileID: 8517438517152498469}
   - {fileID: 1362438431680433326}
+  entrance: {fileID: 0}
   cost:
-    stone: 15
-    wood: 8
+    resources: 0a0000000a000000
   buildingPointsCost: 10
   type: 0
   isFinished: 0

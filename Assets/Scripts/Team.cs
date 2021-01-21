@@ -24,9 +24,9 @@ namespace dmdspirit
 
         public List<Unit> Units { get; private set; }
 
-        
+
         private List<Building> buildings;
-        private List<ConstructionSite> buildingSites;
+        private List<ConstructionSite> constructionSites;
 
         private void Start()
         {
@@ -38,23 +38,32 @@ namespace dmdspirit
         public void Initialize(List<string> players, int maxUnitCount)
         {
             buildings = new List<Building>();
-            buildingSites = new List<ConstructionSite>();
+            constructionSites = new List<ConstructionSite>();
             buildings.Add(baseBuilding);
             StartCoroutine(SpawnUnits(players, maxUnitCount));
             ui.gameObject.SetActive(true);
             storedResources = new ResourceCollection();
             ui.Initialize(this);
         }
-        
+
         public void AddBuildingSite(ConstructionSite constructionSite)
         {
-            buildingSites.Add(constructionSite);
-            constructionSite.OnBuildingSiteFinished += BuildingSiteFinishedHandler;
+            constructionSites.Add(constructionSite);
+            constructionSite.OnConstructionSiteFinished += ConstructionSiteFinishedHandler;
         }
 
-        private void BuildingSiteFinishedHandler(ConstructionSite constructionSite)
+        private void ConstructionSiteFinishedHandler(ConstructionSite constructionSite)
         {
-            buildingSites.Remove(constructionSite);
+            constructionSites.Remove(constructionSite);
+            AddBuilding(constructionSite);
+        }
+
+        public int GetAnyResourceUpToValue(ResourceType type, int value)
+        {
+            var result = storedResources.GetAnyResourceUpToValue(type, value);
+            if (result != 0)
+                OnResourceChange?.Invoke();
+            return result;
         }
 
         public List<Building> GetBuildingsOfType(BuildingType type) => buildings.Where(x => x.type == type).ToList();

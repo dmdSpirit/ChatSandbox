@@ -16,11 +16,12 @@ namespace dmdspirit
 
         // TODO: I need to be able to stop only current state event if it has parent state.
         // TODO: Do all states need an additional stop condition to be checked every update?
-        public void StopState()
+        public virtual void StopState(bool stopParent = true)
         {
             // TODO: Not working right when called from constructor.
             Finish();
-            parentState?.Finish();
+            if (stopParent)
+                parentState?.Finish();
         }
 
 
@@ -30,7 +31,7 @@ namespace dmdspirit
                 state.parentState = this;
             OnPushState?.Invoke(state);
         }
-        
+
         protected void PushMoveState(Unit unit, Vector3 moveDestination, float stopDistance)
         {
             var moveToBaseState = new MoveState(unit, moveDestination, stopDistance);

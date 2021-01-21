@@ -9,11 +9,13 @@ namespace dmdspirit
         [SerializeField] private Transform[] objectsToRotate;
 
         public MapPosition Position;
+        
+        public ConstructionSite ConstructionSite { get; private set; }
+        public Building Building { get; private set; }
+        
+        private TileType type;
 
-        public TileType Type { get; private set; }
-
-        // HACK: rework later.
-        public bool isEmpty => transform.childCount <= 1;
+        // TODO: if tile has resources track when it can become empty.
 
         private void Start()
         {
@@ -22,7 +24,7 @@ namespace dmdspirit
 
         public void Initialize(int x, int y, TileType type, TileDirection direction)
         {
-            Type = type;
+            this.type = type;
             Position = new MapPosition(x, y);
             coordinateLabel.text = Position.Coordinates;
             name = $"{type.ToString()}({Position.CX}, {Position.y})";
@@ -31,6 +33,26 @@ namespace dmdspirit
                 objectToRotate.Rotate(Vector3.up, rotation);
         }
 
-        // TODO: if tile has resources track when it can become empty.
+        public bool CheckCanBuild() => ConstructionSite == null && Building == null && type != TileType.Stone && type != TileType.Wood;
+
+        public void AddConstructionSite(ConstructionSite constructionSite)
+        {
+            if (CheckCanBuild() == false)
+            {
+                Debug.LogError($"Something is trying to build on tile {Position.ToString()}.");
+                return;
+            }
+
+            this.ConstructionSite = constructionSite;
+            constructionSite.OnConstructionSiteFinished += ConstructionSiteFinishedHandler;
+        }
+
+        private void ConstructionSiteFinishedHandler(ConstructionSite cs)
+        {
+            Building = ConstructionSite.Building;
+            Building.transform.SetParent(transform);
+            ConstructionSite.OnConstructionSiteFinished -= ConstructionSiteFinishedHandler;
+            ConstructionSite = null;
+        }
     }
 }

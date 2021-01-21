@@ -28,7 +28,8 @@ namespace dmdspirit
         public int maxCarryingCapacity;
         public bool canBuild;
         public float buildingDistance;
-        public float buildingSpeed;
+        public float buildingPoints;
+        public float buildingPointsCooldown;
         public BuildingType buildingNeeded;
         public GameObject modelPrefab;
         public bool canPatrol;

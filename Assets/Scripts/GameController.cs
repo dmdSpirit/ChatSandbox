@@ -53,21 +53,27 @@ namespace dmdspirit
 
         private void ChatCommandHandler(ChatParser.Command command)
         {
-            Unit unit=null;
+            Unit unit = null;
             if (command.commandType != ChatParser.ChatCommands.Join)
             {
-                if (playerUnits.ContainsKey(command.user))
+                if (command.isBotCommand)
+                {
+                    var team = command.teamTag == TeamTag.green ? greenTeam : redTeam;
+                    if (team.Units.Count < command.botIndex)
+                        return;
+                    unit = team.Units[command.botIndex];
+                    if (unit.IsPlayer) return;
+                }
+                else if (playerUnits.ContainsKey(command.user))
                     unit = playerUnits[command.user];
                 else
                     return;
             }
-            
+
             switch (command.commandType)
             {
                 case ChatParser.ChatCommands.Join:
                     JoinUser(command.user, command.teamTag);
-                    break;
-                case ChatParser.ChatCommands.Bot:
                     break;
                 case ChatParser.ChatCommands.Gather:
                     unit.GatherResource(command.resourceType);

@@ -5,27 +5,6 @@ using UnityEngine;
 
 namespace dmdspirit
 {
-    public class Delivery
-    {
-        public event Action<Delivery> OnDeliveryInterrupted;
-
-        public Unit unit;
-        public Resource resource;
-
-        public Delivery(Unit unit, Resource resource)
-        {
-            this.unit = unit;
-            this.resource = resource;
-            unit.OnDeath += UnitDeathHandler;
-        }
-
-        private void UnitDeathHandler(Unit unit)
-        {
-            OnDeliveryInterrupted?.Invoke(this);
-            unit.OnDeath -= UnitDeathHandler;
-        }
-    }
-    
     public class ConstructionSite : MonoBehaviour
     {
         public enum ConstructionState
@@ -35,14 +14,14 @@ namespace dmdspirit
             Finished
         }
 
-        public event Action<ConstructionSite> OnBuildingSiteFinished;
+        public event Action<ConstructionSite> OnConstructionSiteFinished;
 
         [SerializeField] private ProgressBar progressBar;
 
         public Building Building { get; private set; }
         public ConstructionState State { get; private set; }
+        public Team Team { get; private set; }
 
-        private Team team;
         private float buildingPoints;
         private List<Delivery> deliveries;
 
@@ -58,15 +37,15 @@ namespace dmdspirit
             if (State == ConstructionState.Building && buildingPoints >= Building.buildingPointsCost)
             {
                 Building.isFinished = true;
-                OnBuildingSiteFinished?.Invoke(this);
+                OnConstructionSiteFinished?.Invoke(this);
                 State = ConstructionState.Finished;
             }
         }
 
         public void Initialize(Team team, Building buildingPrefab, TileDirection direction)
         {
-            this.team = team;
-            Building = Instantiate(buildingPrefab, Vector3.zero, Quaternion.Euler(0, (int) direction * 90, 0), transform);
+            Team = team;
+            Building = Instantiate(buildingPrefab, transform.position, Quaternion.Euler(0, (int) direction * 90, 0), transform);
             Building.Initialize(team);
             buildingPoints = 0;
             progressBar.SetProgress(buildingPoints / Building.buildingPointsCost);
@@ -80,29 +59,27 @@ namespace dmdspirit
             if (State != ConstructionState.Building) return;
             this.buildingPoints += buildingPoints;
             // TODO: Animate building process.
+            Debug.Log($"{name} building points added {buildingPoints}.");
             progressBar.SetProgress(this.buildingPoints / Building.buildingPointsCost);
         }
 
         public void DestroySite()
         {
-            if (State == ConstructionState.Finished)
-                Building.transform.SetParent(transform.parent);
             Destroy(gameObject);
         }
 
         public void FinishDelivery(Delivery delivery)
         {
             AddResources(delivery.resource);
-            delivery.unit.carriedResource.Clear();
             deliveries.Remove(delivery);
             delivery.OnDeliveryInterrupted -= DeliveryInterruptedHandler;
         }
 
         public int TryAddResource(Resource resource)
         {
-            if (resource.value == 0) return 0;
+            if (resource.value == 0 || resource.type == ResourceType.None) return resource.value;
             var resourcesNeeded = GetNeededResourcesWithDeliveries();
-            if (resourcesNeeded.ContainsKey(resource.type) == false) return 0;
+            if (resourcesNeeded.ContainsKey(resource.type) == false) return resource.value;
             // IMPROVE: Unit should be able override delivery if it has resources needed right now.
 
             var resourceLeft = resource.value - Mathf.Min(resource.value, resourcesNeeded[resource.type]);
@@ -136,7 +113,13 @@ namespace dmdspirit
             var resourcesNeeded = GetNeededResourcesWithDeliveries();
             var teamResources = unit.UnitTeam.storedResources;
             var deliveryResourceType = resourcesNeeded.Keys.FirstOrDefault(resourceType => teamResources.HasEnough(resourceType, Mathf.Min(resourcesNeeded[resourceType], unit.CurrentJob.maxCarryingCapacity)));
-            if (deliveryResourceType == ResourceType.None) deliveryResourceType = resourcesNeeded.First().Key;
+            if (deliveryResourceType == ResourceType.None)
+            {
+                if (resourcesNeeded.Count == 0)
+                    return false;
+                deliveryResourceType = resourcesNeeded.FirstOrDefault().Key;
+            }
+
             var resource = new Resource {type = deliveryResourceType, value = Mathf.Min(unit.CurrentJob.maxCarryingCapacity, resourcesNeeded[deliveryResourceType])};
             delivery = new Delivery(unit, resource);
             deliveries.Add(delivery);

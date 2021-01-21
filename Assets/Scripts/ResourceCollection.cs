@@ -24,6 +24,9 @@ namespace dmdspirit
             type = ResourceType.None;
             value = 0;
         }
+
+        public static bool operator ==(Resource a, Resource b) => a.type == b.type && a.value == b.value;
+        public static bool operator !=(Resource a, Resource b) => !(a == b);
     }
 
     [Serializable]

@@ -2,15 +2,16 @@
 
 + !move a2
 + !build 'where' 'what' 'direction'
-- building site (units have to carry resources needed for building to the building site to finish building)
-- Update commands
-    - !build a2 (takes 1 parameter and commands unit to work on construction site in a2 if there is any)
-- Commands for bots (specify a sector to work in)
-    - !bot team index command
-    - !bot team index build a2
-- fix: Build site progress bar is rotated with the bulding
++ building site (units have to carry resources needed for building to the building site to finish building)
++ Update commands
+    + !build a2 (takes 1 parameter and commands unit to work on construction site in a2 if there is any)
++ Commands for bots (specify a sector to work in)
+    + !bot team index command
++ fix: Build site progress bar is rotated with the bulding
++ Finish building site that was left by builder
+
 - build zone (sc pylon or radius around any building)
-- Finish building site that was left by builder
+
 - Units can attack buildings
 - Repair
 - Update win condition

@@ -28,7 +28,8 @@ MonoBehaviour:
   maxCarryingCapacity: 10
   canBuild: 1
   buildingDistance: 3
-  buildingSpeed: 1
+  buildingPoints: 1
+  buildingPointsCooldown: 2
   buildingNeeded: 1
   modelPrefab: {fileID: 0}
   canPatrol: 1

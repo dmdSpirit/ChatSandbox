@@ -131,16 +131,14 @@ MonoBehaviour:
   renderers:
   - {fileID: 392476578980858328}
   - {fileID: 1033298700954371003}
+  entrance: {fileID: 8045299308599390058}
   cost:
-    stone: 10
-    wood: 15
+    resources: 0a0000000a000000
   buildingPointsCost: 15
   type: 3
   isFinished: 0
-  warriorCost:
-    stone: 5
-    wood: 5
-  entrance: {fileID: 8045299308599390058}
+  warriorCollection:
+    resources: 0000000000000000
 --- !u!208 &8754482114801344705
 NavMeshObstacle:
   m_ObjectHideFlags: 0

@@ -39,8 +39,9 @@ namespace dmdspirit
             public UnitJobType jobType;
             public int botIndex;
             public ResourceType resourceType;
+            public bool isBotCommand;
         }
-        
+
         public event Action<Command> OnCommand;
 
         private struct Message
@@ -108,73 +109,81 @@ namespace dmdspirit
         private void ChatCommandReceivedHandler(object sender, OnChatCommandReceivedArgs e)
         {
             var userName = e.Command.ChatMessage.DisplayName;
-            if (TryParseChatCommand(e.Command.CommandText, out var command) == false)
+            if (TryParseChatCommand(e.Command.CommandText, out var commandType) == false)
             {
                 Debug.LogError($"Could not parse chat command {userName}: {e.Command.CommandText}");
                 return;
             }
 
+            var command = new Command() {user = userName};
             var args = e.Command.ArgumentsAsList;
-            switch (command)
+            switch (commandType)
             {
-                case ChatCommands.Join:
-                    if (TryParseJoinCommand(userName, args, out var joinCommand))
-                        commandList.Add(joinCommand);
-                    break;
-                case ChatCommands.Gather:
-                    if (TryParseGatherCommand(userName, args, out var gatherCommand))
-                        commandList.Add(gatherCommand);
-                    break;
                 case ChatCommands.Help:
-                    ParseHelpCommand(userName, args, e.Command.ChatMessage.Channel);
+                    ParseHelpCommand(args, e.Command.ChatMessage.Channel);
+                    return;
+                case ChatCommands.Bot:
+                    if (TryParseBotCommand(args, ref command) == false)
+                        return;
+                    if (TryParseChatCommand(args[2], out commandType) == false)
+                    {
+                        Debug.LogError($"Could not parse chat command {userName}: {e.Command.CommandText}");
+                        return;
+                    }
+
+                    args.RemoveRange(0, 3);
+                    command.isBotCommand = true;
                     break;
-                case ChatCommands.Build:
-                    if (TryParseBuildCommand(userName, args, out var buildCommand))
-                        commandList.Add(buildCommand);
-                    break;
-                case ChatCommands.Job:
-                    if (TryParseJobCommand(userName, args, out var jobCommand))
-                        commandList.Add(jobCommand);
-                    break;
-                case ChatCommands.Patrol:
-                    if (TryParsePatrolCommand(userName, args, out var patrolCommand))
-                        commandList.Add(patrolCommand);
-                    break;
-                case ChatCommands.Move:
-                    if (TryParseMoveCommand(userName, args, out var moveCommand))
-                        commandList.Add(moveCommand);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
+
+            if (TryParseCommand(commandType, args, ref command))
+                commandList.Add(command);
         }
 
-        private void ParseHelpCommand(string userName, List<string> args, string channel)
+        private bool TryParseBotCommand(List<string> args, ref Command command) => args.Count > 3 && Enum.TryParse(args[0], true, out command.teamTag) && int.TryParse(args[1], out command.botIndex);
+
+        private bool TryParseCommand(ChatCommands commandType, List<string> args, ref Command command)
+        {
+            command.commandType = commandType;
+            switch (commandType)
+            {
+                case ChatCommands.Join:
+                    return TryParseJoinCommand(args, ref command);
+                case ChatCommands.Gather:
+                    return TryParseGatherCommand(args, ref command);
+                case ChatCommands.Build:
+                    return TryParseBuildCommand(args, ref command);
+                case ChatCommands.Job:
+                    return TryParseJobCommand(args, ref command);
+                case ChatCommands.Patrol:
+                    return TryParsePatrolCommand(args, ref command);
+                case ChatCommands.Move:
+                    return TryParseMoveCommand(args, ref command);
+            }
+
+            return false;
+        }
+
+        private void ParseHelpCommand(List<string> args, string channel)
         {
             // TODO: Improve help command (!help build)
             client.SendMessage(channel, $"List of commands: {GetCommandList()}");
         }
 
         // !join red, !join
-        private bool TryParseJoinCommand(string userName, List<string> args, out Command command)
+        private bool TryParseJoinCommand(List<string> args, ref Command command)
         {
-            command = new Command() {user = userName, commandType = ChatCommands.Gather, teamTag = TeamTag.None};
             if (args.Count > 0 && Enum.TryParse<TeamTag>(args[0], true, out var teamTag))
                 command.teamTag = teamTag;
             return true;
         }
 
         // !gather wood
-        private bool TryParseGatherCommand(string userName, List<string> args, out Command command)
-        {
-            command = new Command() {user = userName, commandType = ChatCommands.Gather};
-            return args.Count >= 1 && Enum.TryParse<ResourceType>(args[0], true, out command.resourceType);
-        }
+        private bool TryParseGatherCommand(List<string> args, ref Command command) => args.Count >= 1 && Enum.TryParse<ResourceType>(args[0], true, out command.resourceType);
 
         // !build a2 tower left, !build a2 tower, !build a2
-        private bool TryParseBuildCommand(string userName, List<string> args, out Command command)
+        private bool TryParseBuildCommand(List<string> args, ref Command command)
         {
-            command = new Command() {user = userName, commandType = ChatCommands.Build};
             if (args.Count < 1 || MapPosition.TryParse(args[0], out command.position) == false) return false;
             if (args.Count > 1 && Enum.TryParse<BuildingType>(args[1], true, out var buildingType))
                 command.buildingType = buildingType;
@@ -184,16 +193,11 @@ namespace dmdspirit
         }
 
         // !job warrior
-        private bool TryParseJobCommand(string userName, List<string> args, out Command command)
-        {
-            command = new Command() {user = userName, commandType = ChatCommands.Job};
-            return args.Count >= 1 && Enum.TryParse<UnitJobType>(args[0], true, out command.jobType);
-        }
+        private bool TryParseJobCommand(List<string> args, ref Command command) => args.Count >= 1 && Enum.TryParse<UnitJobType>(args[0], true, out command.jobType);
 
         // !patrol a2 b2, !patrol a2
-        private bool TryParsePatrolCommand(string userName, List<string> args, out Command command)
+        private bool TryParsePatrolCommand(List<string> args, ref Command command)
         {
-            command = new Command() {user = userName, commandType = ChatCommands.Patrol};
             // 1 or 2 args. if only one => patrol between current position and target
             if (args.Count < 1 || MapPosition.TryParse(args[0], out var firstPosition) == false) return false;
             command.position = firstPosition;
@@ -203,11 +207,7 @@ namespace dmdspirit
         }
 
         // !move a2
-        private bool TryParseMoveCommand(string userName, List<string> args, out Command command)
-        {
-            command = new Command() {user = userName, commandType = ChatCommands.Move};
-            return args.Count >= 1 && MapPosition.TryParse(args[0], out command.position);
-        }
+        private bool TryParseMoveCommand(List<string> args, ref Command command) => args.Count >= 1 && MapPosition.TryParse(args[0], out command.position);
 
         private string GetCommandList() => string.Join(", ", ((from ChatCommands command in Enum.GetValues(typeof(ChatCommands)) where excludedCommands.Contains(command) == false select string.Concat("!", command.ToString().ToLower()))));
 

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
 
 namespace dmdspirit
 {
@@ -12,19 +11,11 @@ namespace dmdspirit
         private ConstructionSite constructionSite;
 
         private float BuildingDistance => unit.CurrentJob.buildingDistance;
-        private float BuildingSpeed => unit.CurrentJob.buildingSpeed;
+        private float BuildingPoints => unit.CurrentJob.buildingPoints;
 
         public BuildState(Unit unit, MapTile targetTile, BuildingType buildingType, TileDirection direction)
         {
             this.unit = unit;
-            if (GameController.Instance.CanBeBuild.Contains(buildingType) == false)
-            {
-                Debug.LogError($"{unit.name} is trying to build {buildingType.ToString()}, but this type of building is not allowed.");
-                // FIXME: Unit Behaviour does not handle correctly when state is stopped in constructor.
-                StopState();
-                return;
-            }
-
             this.targetTile = targetTile;
             this.buildingType = buildingType;
             this.direction = direction;
@@ -32,40 +23,53 @@ namespace dmdspirit
 
         public override void Update()
         {
-            if (Vector3.Distance(unit.transform.position, targetTile.transform.position) > BuildingDistance)
-            {
-                PushMoveState(unit, targetTile.transform.position, BuildingDistance);
-                return;
-            }
-
             if (constructionSite == null)
             {
-                if (targetTile.isEmpty == false)
+                // Check if there is an existing construction site.
+                if (targetTile.ConstructionSite != null)
                 {
-                    Debug.Log($"Something blocked tile that {unit.name} was trying to build in. {targetTile.Position.ToString()}");
-                    StopState();
-                    return;
+                    if (targetTile.ConstructionSite.Team != unit.UnitTeam)
+                    {
+                        StopState();
+                        return;
+                    }
+
+                    constructionSite = targetTile.ConstructionSite;
                 }
+                else
+                {
+                    if (targetTile.CheckCanBuild() == false || GameController.Instance.CanBeBuild.Contains(buildingType) == false)
+                    {
+                        StopState();
+                        return;
+                    }
 
-                var cost = BuildingController.Instance.GetBuildingCost(buildingType);
-                if (unit.UnitTeam.storedResources.HasEnough(cost) == false)
-                    return;
+                    if (Vector3.Distance(unit.transform.position, targetTile.transform.position) > unit.CurrentJob.buildingDistance)
+                    {
+                        PushMoveState(unit, targetTile.transform.position, unit.CurrentJob.buildingDistance);
+                        return;
+                    }
 
-                Debug.Log($"{unit.name} has started building {buildingType.ToString()}.");
-                constructionSite = BuildingController.Instance.CreateConstructionSite(unit.UnitTeam, buildingType, targetTile, direction);
-                // buildingSite.OnBuildingComplete += BuildingCompleteHandler;
-                unit.UnitTeam.SpendResources(cost);
-                return;
+                    // Try to create construction site.
+                    constructionSite = BuildingController.Instance.CreateConstructionSite(unit.UnitTeam, buildingType, targetTile, direction);
+                    targetTile.AddConstructionSite(constructionSite);
+                    var resourcesLeft = constructionSite.TryAddResource(unit.carriedResource);
+                    unit.SpendCarriedResource(unit.carriedResource.value - resourcesLeft);
+                }
             }
 
-            constructionSite.AddBuildingPoints(BuildingSpeed * Time.deltaTime);
+            switch (constructionSite.State)
+            {
+                case ConstructionSite.ConstructionState.GatheringResources:
+                    PushState(new DeliveryState(unit, constructionSite));
+                    return;
+                case ConstructionSite.ConstructionState.Building:
+                    PushState(new AddBuildingPointsState(unit, constructionSite));
+                    return;
+                case ConstructionSite.ConstructionState.Finished:
+                    StopState();
+                    return;
+            }
         }
-
-        // private void BuildingCompleteHandler()
-        // {
-        //     Debug.Log($"{unit.name} has completed building {buildingType.ToString()}.");
-        //     unit.UnitTeam.AddBuilding(buildingSite);
-        //     StopState();
-        // }
     }
 }

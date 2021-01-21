@@ -126,10 +126,9 @@ namespace dmdspirit
 
         public void LoadResourcesToBase()
         {
+            if (carriedResource.type == ResourceType.None) return;
             UnitTeam.AddResource(carriedResource);
-            carriedResource.type = ResourceType.None;
-            carriedResource.value = 0;
-            OnCarriedResourceChanged?.Invoke();
+            DropResources();
         }
 
         public void Build(BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
@@ -159,6 +158,8 @@ namespace dmdspirit
             OnUpdateHP?.Invoke();
         }
 
+        public void AddResource(Resource resource) => AddResource(resource.type, resource.value);
+
         public void AddResource(ResourceType type, int quantity)
         {
             if (carriedResource.type != ResourceType.None && carriedResource.type != type)
@@ -167,7 +168,24 @@ namespace dmdspirit
                 return;
             }
 
+            if (carriedResource.type == ResourceType.None)
+                carriedResource.type = type;
+
             carriedResource.value += quantity;
+            OnCarriedResourceChanged?.Invoke();
+        }
+
+        public void SpendCarriedResource(int value)
+        {
+            carriedResource.value -= value;
+            if (carriedResource.value <= 0)
+                carriedResource.Clear();
+            OnCarriedResourceChanged?.Invoke();
+        }
+
+        public void DropResources()
+        {
+            carriedResource.Clear();
             OnCarriedResourceChanged?.Invoke();
         }
 
