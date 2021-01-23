@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace dmdspirit
 {
-    public class ConstructionSite : MonoBehaviour
+    public class ConstructionSite : MonoBehaviour, ICanBeHit
     {
         public enum ConstructionState
         {
@@ -21,6 +21,7 @@ namespace dmdspirit
         public Building Building { get; private set; }
         public ConstructionState State { get; private set; }
         public Team Team { get; private set; }
+        public MapTile Tile { get; private set; }
 
         private float buildingPoints;
         private List<Delivery> deliveries;
@@ -37,13 +38,15 @@ namespace dmdspirit
             if (State == ConstructionState.Building && buildingPoints >= Building.buildingPointsCost)
             {
                 Building.isFinished = true;
+                Building.transform.SetParent(Tile.transform);
                 OnConstructionSiteFinished?.Invoke(this);
                 State = ConstructionState.Finished;
             }
         }
 
-        public void Initialize(Team team, Building buildingPrefab, TileDirection direction)
+        public void Initialize(Team team, Building buildingPrefab, MapTile tile, TileDirection direction)
         {
+            Tile = tile;
             Team = team;
             Building = Instantiate(buildingPrefab, transform.position, Quaternion.Euler(0, (int) direction * 90, 0), transform);
             Building.Initialize(team);
@@ -139,5 +142,12 @@ namespace dmdspirit
 
             return resourcesNeeded;
         }
+
+        public void GetHit(float damage)
+        {
+        }
+
+        public bool IsAlive() => true;
+        public bool IsInRage(Vector3 attacker, float range) => Vector3.Distance(attacker, transform.position) <= range;
     }
 }

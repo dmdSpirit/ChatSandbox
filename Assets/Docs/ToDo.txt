@@ -9,27 +9,28 @@
     + !bot team index command
 + fix: Build site progress bar is rotated with the bulding
 + Finish building site that was left by builder
++ build zone (sc pylon or radius around any building)
++ FIX: Tower is not attacking units
++ Units can attack buildings
 
-- build zone (sc pylon or radius around any building)
-
-- Units can attack buildings
+- Building/ConstructionSite destruction
 - Repair
 - Update win condition
 - Rework ResultsUI
-- Workers move slower with resources
 - Unit regeneration
 - Respawn timer UI
-- Different speed for idle walking, chasing and so on
 - For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
     - Fix getting stuck when trying to patrol tile with base building
 - Rework test map
 - Test for 10-15 units in team
+- Refactor/clear code (TODOs and so on)
 
 --------------------------
 - Gameplay footage 
 
 ------------------------------
 Future:
+- Different speed for idle walking, chasing, carrying resources and so on
 - Bot units get commands from the team priority list (get resources/build).
 - Chat command errors.
 - Rage attacks and jobs (mage/archer)
@@ -43,10 +44,10 @@ Future:
     - user id consistency
 - !kill userName (attack userName if unit is found in agro radius)
 - Plant trees
-- after v3-4 refactor and solve all //TODO:s
 - Stop using NavMesh. (Check Pathfinder: Kingmaker game code for other navigation system)
 - Show current task icon or visualize path
 - Rework unit/unitBehaviour classes and chat commands.
+
 
 ------------------------------
 ------------------------------

@@ -24,6 +24,7 @@ namespace dmdspirit
         [SerializeField] private ResultsUI resultsUI;
 
         // HACK: Hardcoded number of teams for now.
+        // TODO: Rewrite using team tags and indexes.
         [SerializeField] private Team greenTeam;
         [SerializeField] private Team redTeam;
         private List<string> redTeamPlayers;
@@ -51,6 +52,9 @@ namespace dmdspirit
             Map.Instance.StartGame();
         }
 
+        // IMPROVE: Not sure this is the best way.
+        public Team GetTeam(TeamTag tag) => tag == TeamTag.red ? redTeam : greenTeam;
+
         private void ChatCommandHandler(ChatParser.Command command)
         {
             Unit unit = null;
@@ -59,8 +63,7 @@ namespace dmdspirit
                 if (command.isBotCommand)
                 {
                     var team = command.teamTag == TeamTag.green ? greenTeam : redTeam;
-                    if (team.Units.Count < command.botIndex)
-                        return;
+                    if (team.Units.Count <= command.botIndex) return;
                     unit = team.Units[command.botIndex];
                     if (unit.IsPlayer) return;
                 }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace dmdspirit
 {
+    // IMPROVE: Do I really need this?
     public class BuildingController : MonoSingleton<BuildingController>
     {
         [SerializeField] private ConstructionSite constructionSitePrefab;
@@ -34,7 +35,7 @@ namespace dmdspirit
         {
             // TODO: Also add building facing direction.
             var constructionSite = Instantiate(constructionSitePrefab, mapTile.transform.position, Quaternion.identity, mapTile.transform);
-            constructionSite.Initialize(team, GetBuildingPrefab(buildingType), direction);
+            constructionSite.Initialize(team, GetBuildingPrefab(buildingType), mapTile, direction);
             team.AddBuildingSite(constructionSite);
             return constructionSite;
         }

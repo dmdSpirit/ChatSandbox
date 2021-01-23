@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 namespace dmdspirit
 {
@@ -33,6 +34,9 @@ namespace dmdspirit
             baseBuilding.Initialize(this);
         }
 
+        public static int GetTeamIndexFromTag(TeamTag tag) => (int) tag - 1;
+        public static TeamTag GetTeamTagFromIndex(int index) => (TeamTag) (index + 1);
+
         public void HideUI() => ui.gameObject.SetActive(false);
 
         public void Initialize(List<string> players, int maxUnitCount)
@@ -44,6 +48,24 @@ namespace dmdspirit
             ui.gameObject.SetActive(true);
             storedResources = new ResourceCollection();
             ui.Initialize(this);
+            // HACK: 
+            var baseTile = baseBuilding.transform.parent.GetComponent<MapTile>();
+            if (baseTile == null)
+            {
+                Debug.LogError($"Could not fild MapTile component if baseBuilding parent.");
+                return;
+            }
+
+            Map.Instance.AddTeamControl(this, baseTile, baseBuilding.controlRadius);
+        }
+
+        public List<ICanBeHit> GetAllPotentialTargets()
+        {
+            var result = new List<ICanBeHit>();
+            result.AddRange(Units.Where(unit => unit.IsAlive()).ToList());
+            result.AddRange(buildings.Where(building => building.IsAlive() && building.isFinished));
+            result.AddRange(constructionSites.Where(constructionSite => constructionSite.IsAlive()));
+            return result;
         }
 
         public void AddBuildingSite(ConstructionSite constructionSite)
@@ -87,6 +109,7 @@ namespace dmdspirit
             var building = constructionSite.Building;
             buildings.Add(building);
             constructionSite.DestroySite();
+            Map.Instance.AddTeamControl(this, constructionSite.Tile, building.controlRadius);
         }
 
         private IEnumerator SpawnUnits(List<string> players, int maxUnitCount)

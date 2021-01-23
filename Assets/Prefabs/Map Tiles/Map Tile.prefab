@@ -146,8 +146,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ca382b6e453404cb630f2093c622a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotateOnStart: 0
   coordinateLabel: {fileID: 7066258352224841493}
+  objectsToRotate: []
+  floorImage: {fileID: 2124234802538336473}
+  defaultTileColor: {r: 0.8313726, g: 0.8941177, b: 1, a: 1}
+  Position:
+    x: 0
+    y: 0
 --- !u!33 &6785238252121586462
 MeshFilter:
   m_ObjectHideFlags: 0

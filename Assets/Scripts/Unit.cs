@@ -6,8 +6,15 @@ using UnityEngine.AI;
 
 namespace dmdspirit
 {
+    public interface ICanBeHit
+    {
+        void GetHit(float damage);
+        bool IsAlive();
+        bool IsInRage(Vector3 attacker, float range);
+    }
+    
     [RequireComponent(typeof(UnitBehaviour), typeof(NavMeshAgent))]
-    public class Unit : MonoBehaviour
+    public class Unit : MonoBehaviour, ICanBeHit
     {
         public event Action<Unit> OnDeath;
         public event Action OnUpdateHP;
@@ -26,7 +33,6 @@ namespace dmdspirit
 
         public Resource carriedResource;
 
-        public bool IsAlive => HP > 0;
         public bool IsPlayer { get; private set; }
         public Team UnitTeam { get; private set; }
         public int UnitID { get; private set; }
@@ -46,9 +52,11 @@ namespace dmdspirit
         private void Update()
         {
             // HACK: For now will do.
-            if (IsAlive == false)
+            if (IsAlive() == false)
                 Destroy(gameObject);
         }
+        
+        public bool IsAlive() => HP > 0;
 
         public void Initialize(Team team, int unitID, Color color, string playerName)
         {
@@ -120,7 +128,7 @@ namespace dmdspirit
         public void GatherResource(ResourceType resourceType)
         {
             if (CurrentJob.canGather == false) return;
-            if (IsAlive == false) return;
+            if (IsAlive() == false) return;
             unitBehaviour.GatherResource(resourceType);
         }
 
@@ -134,28 +142,8 @@ namespace dmdspirit
         public void Build(BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
         {
             if (CurrentJob.canBuild == false) return;
-            if (IsAlive == false) return;
+            if (IsAlive() == false) return;
             unitBehaviour.Build(buildingType, mapPosition, direction);
-        }
-
-        public void DealDamage(Unit target)
-        {
-            Debug.Log($"{name} zzzaps {target.name} for {CurrentJob.damage} damage.");
-            target.TakeDamage(CurrentJob.damage);
-        }
-
-        public void TakeDamage(float damage)
-        {
-            HP -= damage;
-            Debug.Log($"{name} takes {damage} damage. HP: ({HP}/{CurrentJob.maxHP})");
-            if (HP <= 0)
-            {
-                // TODO: Update unit UI on death.
-                OnDeath?.Invoke(this);
-                return;
-            }
-
-            OnUpdateHP?.Invoke();
         }
 
         public void AddResource(Resource resource) => AddResource(resource.type, resource.value);
@@ -189,7 +177,12 @@ namespace dmdspirit
             OnCarriedResourceChanged?.Invoke();
         }
 
-        public void AttackUnit(Unit target) => unitBehaviour.AttackUnit(target);
+        public void AttackUnit(ICanBeHit target) => unitBehaviour.AttackUnit(target);
+
+        public void DealDamage(ICanBeHit target)
+        {
+            target.GetHit(CurrentJob.damage);
+        }
 
         private void UpdateHPBar()
         {
@@ -208,5 +201,21 @@ namespace dmdspirit
         {
             unitBehaviour.Move(position);
         }
+
+        public void GetHit(float damage)
+        {
+            HP -= damage;
+            Debug.Log($"{name} takes {damage} damage. HP: ({HP}/{CurrentJob.maxHP})");
+            if (HP <= 0)
+            {
+                // TODO: Update unit UI on death.
+                OnDeath?.Invoke(this);
+                return;
+            }
+
+            OnUpdateHP?.Invoke();
+        }
+
+        public bool IsInRage(Vector3 attacker, float range) => Vector3.Distance(attacker, transform.position) <= range;
     }
 }

@@ -50,10 +50,13 @@ MonoBehaviour:
   renderers:
   - {fileID: 514277452096163685}
   - {fileID: 8077351721776046968}
-  cost:
-    stone: 0
-    wood: 0
   entrance: {fileID: 35894665887938390}
+  cost:
+    resources: 0000000000000000
+  buildingPointsCost: 0
+  type: 1
+  isFinished: 0
+  controlRadius: 3
 --- !u!208 &5704760418827521047
 NavMeshObstacle:
   m_ObjectHideFlags: 0

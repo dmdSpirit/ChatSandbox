@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.WSA;
 
 namespace dmdspirit
 {
@@ -37,6 +38,11 @@ namespace dmdspirit
     {
         public Dictionary<ResourceType, List<ResourceNode>> resources { get; protected set; }
 
+        [SerializeField] private Material empty;
+        [SerializeField] private Material red;
+        [SerializeField] private Material green;
+        [SerializeField] private Material both;
+
         private MapTile[,] mapTiles;
         private List<MapTile> tiles;
         private int mapWidth;
@@ -52,6 +58,26 @@ namespace dmdspirit
             }
 
             tiles = new List<MapTile>();
+        }
+
+        public Material GetTileMaterial(bool[] teamControl)
+        {
+            // IMPROVE: ??
+            var redControl = teamControl[Team.GetTeamIndexFromTag(TeamTag.red)];
+            var greenControl = teamControl[Team.GetTeamIndexFromTag(TeamTag.green)];
+            if (greenControl && redControl) return both;
+            if (greenControl == false && redControl == false) return empty;
+            return greenControl ? green : red;
+        }
+
+        public void AddTeamControl(Team team, MapTile tile, int radius)
+        {
+            for (var x = Mathf.Max(0, tile.Position.x - radius); x <= Mathf.Min(mapWidth - 1, tile.Position.x + radius); x++)
+            for (var y = Mathf.Max(0, tile.Position.y - radius); y <= Mathf.Min(mapHeight - 1, tile.Position.y + radius); y++)
+            {
+                if (Mathf.Abs(tile.Position.x - x) + Mathf.Abs(tile.Position.y - y) > radius) continue;
+                GetTile(x, y).AddTeamControl(team);
+            }
         }
 
         public void RegisterMapTile(MapTile tile)
@@ -90,6 +116,9 @@ namespace dmdspirit
         }
 
         public bool CheckPosition(MapPosition position) => position.x < mapWidth && position.y < mapHeight && position.x >= 0 && position.y >= 0;
+
+
+        public MapTile GetTile(int x, int y) => GetTile(new MapPosition(x, y));
 
         public MapTile GetTile(MapPosition position)
         {

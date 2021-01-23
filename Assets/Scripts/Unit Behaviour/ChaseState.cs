@@ -22,7 +22,7 @@ namespace dmdspirit
 
         public override void Update()
         {
-            if (target.IsAlive && Vector3.Distance(agent.transform.position, target.transform.position) <= stopDistance)
+            if (target.IsAlive() && Vector3.Distance(agent.transform.position, target.transform.position) <= stopDistance)
             {
                 agent.ResetPath();
                 Finish();
@@ -34,7 +34,7 @@ namespace dmdspirit
 
         private void UpdatePath()
         {
-            if (target.IsAlive == false || agent.CalculatePath(target.transform.position, path) == false)
+            if (target.IsAlive() == false || agent.CalculatePath(target.transform.position, path) == false)
             {
                 Finish();
                 return;

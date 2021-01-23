@@ -15,7 +15,7 @@ namespace dmdspirit
         private void Update()
         {
             // HACK:
-            if (unit.IsAlive == false) return;
+            if (unit.IsAlive() == false) return;
             searchForEnemiesState?.Update();
             // TODO: Handle empty state stack.
             if (stateStack.Count != 0)
@@ -64,13 +64,17 @@ namespace dmdspirit
 
         public void Build(BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
         {
+            var mapTile = Map.Instance.GetTile(mapPosition);
+            if (mapTile.CheckCanBuild(unit.UnitTeam.teamTag, buildingType) == false) return;
+            if (mapTile.ConstructionSite != null)
+                buildingType = mapTile.ConstructionSite.Building.type;
             StopCurrentState();
             // TODO: Check if buildingType is specified or if there is a construction site.
             var buildState = new BuildState(unit, Map.Instance.GetTile(mapPosition), buildingType, direction);
             PushNewStateHandler(buildState);
         }
 
-        public void AttackUnit(Unit target)
+        public void AttackUnit(ICanBeHit target)
         {
             var attackState = new AttackState(unit, target);
             attackState.OnStateFinish += (x) => StartSearchingForEnemies();

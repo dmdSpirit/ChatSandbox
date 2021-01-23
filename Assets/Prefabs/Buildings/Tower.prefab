@@ -394,10 +394,11 @@ MonoBehaviour:
   - {fileID: 1362438431680433326}
   entrance: {fileID: 0}
   cost:
-    resources: 0a0000000a000000
-  buildingPointsCost: 10
-  type: 0
+    resources: 0a00000000000000
+  buildingPointsCost: 1
+  type: 2
   isFinished: 0
+  controlRadius: 2
   attackDamage: 2
   attackRadius: 15
   attackCooldown: 3

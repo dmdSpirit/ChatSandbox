@@ -16,6 +16,25 @@ namespace dmdspirit
     [Serializable]
     public struct Resource
     {
+        public bool Equals(Resource other)
+        {
+            return type == other.type && value == other.value;
+        }
+
+        // FIXME: Rewrite.
+        public override bool Equals(object obj)
+        {
+            return obj is Resource other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((int) type * 397) ^ value;
+            }
+        }
+
         public ResourceType type;
         public int value;
 

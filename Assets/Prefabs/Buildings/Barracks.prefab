@@ -133,10 +133,11 @@ MonoBehaviour:
   - {fileID: 1033298700954371003}
   entrance: {fileID: 8045299308599390058}
   cost:
-    resources: 0a0000000a000000
-  buildingPointsCost: 15
+    resources: 000000000a000000
+  buildingPointsCost: 1
   type: 3
   isFinished: 0
+  controlRadius: 2
   warriorCollection:
     resources: 0000000000000000
 --- !u!208 &8754482114801344705

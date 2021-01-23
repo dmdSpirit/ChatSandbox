@@ -38,7 +38,7 @@ namespace dmdspirit
                 }
                 else
                 {
-                    if (targetTile.CheckCanBuild() == false || GameController.Instance.CanBeBuild.Contains(buildingType) == false)
+                    if (targetTile.CheckCanBuild(unit.UnitTeam.teamTag, buildingType) == false || GameController.Instance.CanBeBuild.Contains(buildingType) == false)
                     {
                         StopState();
                         return;
