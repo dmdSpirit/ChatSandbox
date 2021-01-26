@@ -5,9 +5,9 @@ namespace dmdspirit
 {
     public class BaseBuilding : Building
     {
-
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             type = BuildingType.Base;
         }
     }

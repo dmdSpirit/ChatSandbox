@@ -17,7 +17,7 @@ namespace dmdspirit
         public override void Update()
         {
             var potentialTargets = GameController.Instance.GetEnemyTeam(unit.UnitTeam).GetAllPotentialTargets();
-            ICanBeHit closestTarget = null;
+            HitPoints closestTarget = null;
             var distance = AggroRadius;
             foreach (var potentialTarget in potentialTargets)
             {
@@ -29,7 +29,7 @@ namespace dmdspirit
             }
 
             if (closestTarget == null) return;
-            unit.AttackUnit(closestTarget);
+            unit.AttackTarget(closestTarget);
             StopState();
         }
     }

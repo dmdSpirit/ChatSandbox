@@ -12,17 +12,20 @@
 + build zone (sc pylon or radius around any building)
 + FIX: Tower is not attacking units
 + Units can attack buildings
++ !kill userName (attack userName if unit is found in agro radius)
 
 - Building/ConstructionSite destruction
-- Repair
+- For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
+
+- Repair (no resources needed)
 - Update win condition
 - Rework ResultsUI
 - Unit regeneration
 - Respawn timer UI
-- For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
     - Fix getting stuck when trying to patrol tile with base building
 - Rework test map
 - Test for 10-15 units in team
+- More verbose help && command error messages to users
 - Refactor/clear code (TODOs and so on)
 
 --------------------------
@@ -30,11 +33,14 @@
 
 ------------------------------
 Future:
+- MOBA (base economy + arena fighting)
+- stream overlay buttons as command shortcuts
+- Rework coordinate system
+- Commands getting too complicated? (bots commands only for testing though)       
 - Different speed for idle walking, chasing, carrying resources and so on
 - Bot units get commands from the team priority list (get resources/build).
 - Chat command errors.
 - Rage attacks and jobs (mage/archer)
-- More verbose help
 - Bots getting stuck in the building while idle walking
 - BAN LIST
 - Unit should be able override delivery if it has resources needed right now.
@@ -42,12 +48,10 @@ Future:
 - Map generation
 - User database
     - user id consistency
-- !kill userName (attack userName if unit is found in agro radius)
 - Plant trees
 - Stop using NavMesh. (Check Pathfinder: Kingmaker game code for other navigation system)
 - Show current task icon or visualize path
-- Rework unit/unitBehaviour classes and chat commands.
-
+- Rework unit/unitBehaviour classes interaction with chat commands.
 
 ------------------------------
 ------------------------------

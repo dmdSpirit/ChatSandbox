@@ -15,7 +15,7 @@ namespace dmdspirit
         private void Update()
         {
             // HACK:
-            if (unit.IsAlive() == false) return;
+            if (unit.HitPoints.IsAlive == false) return;
             searchForEnemiesState?.Update();
             // TODO: Handle empty state stack.
             if (stateStack.Count != 0)
@@ -74,13 +74,12 @@ namespace dmdspirit
             PushNewStateHandler(buildState);
         }
 
-        public void AttackUnit(ICanBeHit target)
+        public void AttackTarget(HitPoints target)
         {
             var attackState = new AttackState(unit, target);
             attackState.OnStateFinish += (x) => StartSearchingForEnemies();
             PushNewStateHandler(attackState);
         }
-
 
         private void StateFinishHandler(State finishedState)
         {
@@ -125,6 +124,21 @@ namespace dmdspirit
         {
             StopCurrentState();
             PushNewStateHandler(new MoveState(unit, Map.Instance.GetTile(position).transform.position, 1.5f));
+        }
+
+        public void StopDelivery()
+        {
+            var currentState = stateStack.Peek();
+            bool isDelivery = currentState is DeliveryState;
+            var state = currentState;
+            while (state != null && isDelivery == false)
+            {
+                state = state.parentState;
+                isDelivery = state is DeliveryState;
+            }
+
+            if (isDelivery)
+                StopCurrentState();
         }
     }
 }

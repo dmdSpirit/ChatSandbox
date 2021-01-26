@@ -6,25 +6,16 @@ using UnityEngine.AI;
 
 namespace dmdspirit
 {
-    public interface ICanBeHit
-    {
-        void GetHit(float damage);
-        bool IsAlive();
-        bool IsInRage(Vector3 attacker, float range);
-    }
-    
     [RequireComponent(typeof(UnitBehaviour), typeof(NavMeshAgent))]
-    public class Unit : MonoBehaviour, ICanBeHit
+    public class Unit : MonoBehaviour
     {
         public event Action<Unit> OnDeath;
-        public event Action OnUpdateHP;
         public event Action OnOwnerChanged;
         public event Action OnCarriedResourceChanged;
         public event Action OnJobChanged;
 
         [SerializeField] private new Renderer renderer;
         [SerializeField] private TMP_Text nameplate;
-        [SerializeField] private ProgressBar hpBar;
 
         [SerializeField] private UnitJobType defaultJob = UnitJobType
             .Worker;
@@ -37,8 +28,8 @@ namespace dmdspirit
         public Team UnitTeam { get; private set; }
         public int UnitID { get; private set; }
         public NavMeshAgent Agent { get; private set; }
-        public float HP { get; private set; }
         public UnitJob CurrentJob { get; private set; }
+        public HitPoints HitPoints { get; private set; }
 
         private UnitBehaviour unitBehaviour;
 
@@ -52,29 +43,33 @@ namespace dmdspirit
         private void Update()
         {
             // HACK: For now will do.
-            if (IsAlive() == false)
+            if (HitPoints.IsAlive == false)
                 Destroy(gameObject);
         }
-        
-        public bool IsAlive() => HP > 0;
 
         public void Initialize(Team team, int unitID, Color color, string playerName)
         {
+            HitPoints = GetComponent<HitPoints>();
             UnitTeam = team;
             nameplate.text = playerName;
             IsPlayer = string.IsNullOrEmpty(playerName) == false;
             UnitID = unitID;
             name = IsPlayer ? playerName : $"{team.teamName} {unitID}";
             renderer.material.SetColor("_Color", color);
-            OnUpdateHP += UpdateHPBar;
             ChangeJob(defaultJob, true);
             unitBehaviour.Initialize(this);
+            HitPoints.OnDeath += DeathHandler;
+        }
+
+        // IMRPOVE: Clear this.
+        private void DeathHandler()
+        {
+            OnDeath?.Invoke(this);
         }
 
         public void Respawn()
         {
-            HP = CurrentJob.maxHP;
-            OnUpdateHP?.Invoke();
+            HitPoints.ResetHP();
             unitBehaviour.Respawn();
         }
 
@@ -86,12 +81,6 @@ namespace dmdspirit
             OnOwnerChanged?.Invoke();
         }
 
-        public void CommandToChangeJob(UnitJobType jobType)
-        {
-            if (TryGetJobFromType(jobType, out var job) == false || jobType == CurrentJob.jobType || UnitTeam.CheckHasBuilding(job.buildingNeeded) == false) return;
-            unitBehaviour.ChangeJob(job);
-        }
-
         public void ChangeJob(UnitJobType jobType, bool setMaxHP = false)
         {
             // TODO: Write job factory of some sort.
@@ -101,14 +90,9 @@ namespace dmdspirit
                 return;
             }
 
-
-            var oldMaxHP = CurrentJob == null ? job.maxHP : CurrentJob.maxHP;
             CurrentJob = job;
-            if (setMaxHP)
-                HP = CurrentJob.maxHP;
-            else
-                HP *= (CurrentJob.maxHP / oldMaxHP);
-            OnUpdateHP?.Invoke();
+
+            HitPoints.ChageMaxHP(CurrentJob.maxHP, setMaxHP);
             OnJobChanged?.Invoke();
         }
 
@@ -125,25 +109,11 @@ namespace dmdspirit
             return false;
         }
 
-        public void GatherResource(ResourceType resourceType)
-        {
-            if (CurrentJob.canGather == false) return;
-            if (IsAlive() == false) return;
-            unitBehaviour.GatherResource(resourceType);
-        }
-
         public void LoadResourcesToBase()
         {
             if (carriedResource.type == ResourceType.None) return;
             UnitTeam.AddResource(carriedResource);
             DropResources();
-        }
-
-        public void Build(BuildingType buildingType, MapPosition mapPosition, TileDirection direction)
-        {
-            if (CurrentJob.canBuild == false) return;
-            if (IsAlive() == false) return;
-            unitBehaviour.Build(buildingType, mapPosition, direction);
         }
 
         public void AddResource(Resource resource) => AddResource(resource.type, resource.value);
@@ -177,45 +147,43 @@ namespace dmdspirit
             OnCarriedResourceChanged?.Invoke();
         }
 
-        public void AttackUnit(ICanBeHit target) => unitBehaviour.AttackUnit(target);
+        public void AttackTarget(HitPoints target) => unitBehaviour.AttackTarget(target);
 
-        public void DealDamage(ICanBeHit target)
-        {
-            target.GetHit(CurrentJob.damage);
-        }
+        public void DealDamage(HitPoints target) => target.GetHit(CurrentJob.damage);
 
-        private void UpdateHPBar()
+        public void Command(ChatParser.Command command)
         {
-            var value = HP / CurrentJob.maxHP;
-            hpBar.gameObject.SetActive(value != 1);
-            hpBar.SetProgress(value);
-        }
-
-        public void Patrol(MapPosition first, MapPosition? second)
-        {
-            if (CurrentJob.canPatrol == false) return;
-            unitBehaviour.Patrol(first, second);
-        }
-
-        public void Move(MapPosition position)
-        {
-            unitBehaviour.Move(position);
-        }
-
-        public void GetHit(float damage)
-        {
-            HP -= damage;
-            Debug.Log($"{name} takes {damage} damage. HP: ({HP}/{CurrentJob.maxHP})");
-            if (HP <= 0)
+            if (HitPoints.IsAlive == false) return;
+            switch (command.commandType)
             {
-                // TODO: Update unit UI on death.
-                OnDeath?.Invoke(this);
-                return;
+                case ChatParser.ChatCommands.Gather:
+                    if (CurrentJob.canGather == false) return;
+                    unitBehaviour.GatherResource(command.resourceType);
+                    break;
+                case ChatParser.ChatCommands.Build:
+                    if (CurrentJob.canBuild == false) return;
+                    unitBehaviour.Build(command.buildingType, command.position, command.direction);
+                    break;
+                case ChatParser.ChatCommands.Job:
+                    if (command.jobType == CurrentJob.jobType || TryGetJobFromType(command.jobType, out var job) == false || UnitTeam.CheckHasBuilding(job.buildingNeeded) == false) return;
+                    unitBehaviour.ChangeJob(job);
+                    break;
+                case ChatParser.ChatCommands.Patrol:
+                    if (CurrentJob.canPatrol == false) return;
+                    unitBehaviour.Patrol(command.position, command.secondPosition);
+                    break;
+                case ChatParser.ChatCommands.Move:
+                    unitBehaviour.Move(command.position);
+                    break;
+                case ChatParser.ChatCommands.Kill:
+                    var enemyTeam = GameController.Instance.GetEnemyTeam(UnitTeam);
+                    Unit target = string.IsNullOrEmpty(command.targetName) == false ? enemyTeam.GetUnit(command.targetIndex) : (command.teamTag != UnitTeam.teamTag ? enemyTeam.GetUnit(command.targetIndex) : null);
+                    if (target == null) return;
+                    unitBehaviour.AttackTarget(target.HitPoints);
+                    break;
             }
-
-            OnUpdateHP?.Invoke();
         }
 
-        public bool IsInRage(Vector3 attacker, float range) => Vector3.Distance(attacker, transform.position) <= range;
+        public void StopDelivery() => unitBehaviour.StopDelivery();
     }
 }

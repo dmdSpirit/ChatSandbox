@@ -7,8 +7,9 @@ namespace dmdspirit
     {
         [SerializeField] private ResourceCollection warriorCollection;
         
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             type = BuildingType.Barracks;
         }
     }

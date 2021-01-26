@@ -59,12 +59,12 @@ namespace dmdspirit
             Map.Instance.AddTeamControl(this, baseTile, baseBuilding.controlRadius);
         }
 
-        public List<ICanBeHit> GetAllPotentialTargets()
+        public List<HitPoints> GetAllPotentialTargets()
         {
-            var result = new List<ICanBeHit>();
-            result.AddRange(Units.Where(unit => unit.IsAlive()).ToList());
-            result.AddRange(buildings.Where(building => building.IsAlive() && building.isFinished));
-            result.AddRange(constructionSites.Where(constructionSite => constructionSite.IsAlive()));
+            var result = new List<HitPoints>();
+            result.AddRange(Units.Select(unit=>unit.HitPoints).Where(hp=>hp.IsAlive).ToList());
+            result.AddRange(buildings.Select(building=>building.HitPoints).Where(hp=>hp.IsAlive).ToList());
+            result.AddRange(constructionSites.Select(constructionSite=>constructionSite.HitPoints).Where(hp=>hp.IsAlive).ToList());
             return result;
         }
 
@@ -164,5 +164,9 @@ namespace dmdspirit
             unit.gameObject.SetActive(false);
             StartCoroutine(RespawnUnit(unit));
         }
+
+        public Unit GetUnit(string playerName) => Units.FirstOrDefault(unit => unit.IsPlayer && unit.name == playerName);
+
+        public Unit GetUnit(int unitIndex) => Units.Count > unitIndex && unitIndex >= 0 ? Units[unitIndex] : null;
     }
 }

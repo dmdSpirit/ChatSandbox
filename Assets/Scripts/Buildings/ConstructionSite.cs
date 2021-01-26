@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace dmdspirit
 {
-    public class ConstructionSite : MonoBehaviour, ICanBeHit
+    public class ConstructionSite : MonoBehaviour
     {
         public enum ConstructionState
         {
@@ -17,11 +17,13 @@ namespace dmdspirit
         public event Action<ConstructionSite> OnConstructionSiteFinished;
 
         [SerializeField] private ProgressBar progressBar;
+        [SerializeField] private float maxHP = 10f;        
 
         public Building Building { get; private set; }
         public ConstructionState State { get; private set; }
         public Team Team { get; private set; }
         public MapTile Tile { get; private set; }
+        public HitPoints HitPoints { get; private set; }
 
         private float buildingPoints;
         private List<Delivery> deliveries;
@@ -46,6 +48,8 @@ namespace dmdspirit
 
         public void Initialize(Team team, Building buildingPrefab, MapTile tile, TileDirection direction)
         {
+            HitPoints = GetComponent<HitPoints>();
+            HitPoints.OnDeath += DeathHandler;
             Tile = tile;
             Team = team;
             Building = Instantiate(buildingPrefab, transform.position, Quaternion.Euler(0, (int) direction * 90, 0), transform);
@@ -55,6 +59,16 @@ namespace dmdspirit
             resourcesLeftToCollect = new ResourceCollection(Building.cost);
             State = ConstructionState.GatheringResources;
             deliveries = new List<Delivery>();
+            HitPoints.Initialize(maxHP);
+        }
+
+        private void DeathHandler()
+        {
+            // TODO: Add destruction animation.
+            foreach (var delivery in deliveries)
+                delivery.unit.StopDelivery();
+            // FIXME: Potential bugs.
+            Destroy(gameObject);
         }
 
         public void AddBuildingPoints(float buildingPoints)
@@ -142,12 +156,5 @@ namespace dmdspirit
 
             return resourcesNeeded;
         }
-
-        public void GetHit(float damage)
-        {
-        }
-
-        public bool IsAlive() => true;
-        public bool IsInRage(Vector3 attacker, float range) => Vector3.Distance(attacker, transform.position) <= range;
     }
 }

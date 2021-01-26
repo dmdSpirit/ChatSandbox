@@ -10,8 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 592411218446386880}
   - component: {fileID: 3688345640795120988}
+  - component: {fileID: 3626026941130574640}
   m_Layer: 0
-  m_Name: Building Site
+  m_Name: Construction Site
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,6 +47,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   progressBar: {fileID: 8128896675982788628}
+  maxHP: 10
+--- !u!114 &3626026941130574640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 592411218446386881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51c95f234db4b464987828ad28a66fd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HPBar: {fileID: 8128896675982788628}
 --- !u!1 &7431323966303713353
 GameObject:
   m_ObjectHideFlags: 0

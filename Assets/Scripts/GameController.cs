@@ -79,19 +79,12 @@ namespace dmdspirit
                     JoinUser(command.user, command.teamTag);
                     break;
                 case ChatParser.ChatCommands.Gather:
-                    unit.GatherResource(command.resourceType);
-                    break;
                 case ChatParser.ChatCommands.Build:
-                    unit.Build(command.buildingType, command.position, command.direction);
-                    break;
                 case ChatParser.ChatCommands.Job:
-                    unit.CommandToChangeJob(command.jobType);
-                    break;
                 case ChatParser.ChatCommands.Patrol:
-                    unit.Patrol(command.position, command.secondPosition);
-                    break;
                 case ChatParser.ChatCommands.Move:
-                    unit.Move(command.position);
+                case ChatParser.ChatCommands.Kill:
+                    unit.Command(command);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

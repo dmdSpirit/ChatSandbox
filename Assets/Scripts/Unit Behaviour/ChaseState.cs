@@ -6,35 +6,37 @@ namespace dmdspirit
     public class ChaseState : State
     {
         private NavMeshAgent agent;
-        private Unit target;
+        private HitPoints target;
         private float stopDistance;
         private NavMeshPath path;
+        private ObjectRadius targetRadius;
 
-        public ChaseState(Unit unit, Unit target, float stopDistance)
+        public ChaseState(Unit unit, HitPoints target, float stopDistance)
         {
             this.target = target;
             this.stopDistance = stopDistance;
             agent = unit.Agent;
             agent.speed = unit.CurrentJob.movementSpeed;
             path = new NavMeshPath();
-            UpdatePath();
+            targetRadius = target.GetComponent<ObjectRadius>();
         }
 
         public override void Update()
         {
-            if (target.IsAlive() && Vector3.Distance(agent.transform.position, target.transform.position) <= stopDistance)
+            var targetPosition = targetRadius == null ? target.transform.position : targetRadius.GetClosestPoint(target.transform.position);
+            if (target.IsAlive && Vector3.Distance(agent.transform.position, targetPosition) <= stopDistance)
             {
                 agent.ResetPath();
                 Finish();
                 return;
             }
 
-            UpdatePath();
+            UpdatePath(targetPosition);
         }
 
-        private void UpdatePath()
+        private void UpdatePath(Vector3 targetPosition)
         {
-            if (target.IsAlive() == false || agent.CalculatePath(target.transform.position, path) == false)
+            if (target.IsAlive == false || agent.CalculatePath(targetPosition, path) == false)
             {
                 Finish();
                 return;

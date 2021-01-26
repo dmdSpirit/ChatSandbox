@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
-using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace dmdspirit
@@ -25,6 +23,7 @@ namespace dmdspirit
             Job, // !j
             Patrol, // !p
             Move, // !m
+            Kill // !k
         }
 
         public struct Command
@@ -40,6 +39,9 @@ namespace dmdspirit
             public int botIndex;
             public ResourceType resourceType;
             public bool isBotCommand;
+            public TeamTag targetTeamTag;
+            public string targetName;
+            public int targetIndex;
         }
 
         public event Action<Command> OnCommand;
@@ -101,6 +103,9 @@ namespace dmdspirit
                 case "m":
                     command = "move";
                     break;
+                case "k":
+                    command = "kill";
+                    break;
             }
 
             return Enum.TryParse<ChatCommands>(command, true, out chatCommand);
@@ -159,6 +164,8 @@ namespace dmdspirit
                     return TryParsePatrolCommand(args, ref command);
                 case ChatCommands.Move:
                     return TryParseMoveCommand(args, ref command);
+                case ChatCommands.Kill:
+                    return TryParseKillCommand(args, ref command);
             }
 
             return false;
@@ -175,6 +182,20 @@ namespace dmdspirit
         {
             if (args.Count > 0 && Enum.TryParse<TeamTag>(args[0], true, out var teamTag))
                 command.teamTag = teamTag;
+            return true;
+        }
+
+        // !kill dmdspirit, !kill red 1
+        private bool TryParseKillCommand(List<string> args, ref Command command)
+        {
+            if (args.Count > 0)
+                if (Enum.TryParse<TeamTag>(args[0], true, out var targetTeamTag))
+                {
+                    command.targetTeamTag = targetTeamTag;
+                    return args.Count > 1 && int.TryParse(args[1], out command.targetIndex);
+                }
+
+            command.targetName = args[0];
             return true;
         }
 

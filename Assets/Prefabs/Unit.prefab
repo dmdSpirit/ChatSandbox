@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1473624264715507050}
   - component: {fileID: 2946590785475601882}
   - component: {fileID: 1114245741968762436}
+  - component: {fileID: 8695513909781744224}
   - component: {fileID: 4449047809546455985}
   m_Layer: 10
   m_Name: Unit
@@ -49,7 +50,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   renderer: {fileID: 2545693539234771700}
   nameplate: {fileID: 3765713721165688694}
-  hpBar: {fileID: 7413395843589854990}
   defaultJob: 0
   jobs:
   - {fileID: 11400000, guid: 7edeaba27b8901841a59c544fe74ac0f, type: 2}
@@ -69,6 +69,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ffaab1519ecbd94596f84feb48d47b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8695513909781744224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473624264715507053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51c95f234db4b464987828ad28a66fd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HPBar: {fileID: 7413395843589854990}
 --- !u!195 &4449047809546455985
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -217,7 +230,7 @@ GameObject:
   - component: {fileID: 4518938430741474716}
   - component: {fileID: 6476756764467483061}
   m_Layer: 8
-  m_Name: Panel
+  m_Name: HP bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

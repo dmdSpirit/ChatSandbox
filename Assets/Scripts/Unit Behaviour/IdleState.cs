@@ -19,6 +19,7 @@ namespace dmdspirit
 
         public override void Update()
         {
+            // TODO: Get next command from command priority list in Team.
             if (unit.IsPlayer || GatherSomething() == false)
                 WalkSomewhere();
         }
@@ -29,7 +30,7 @@ namespace dmdspirit
             var notEmptyResources = (from resource in Map.Instance.resources where resource.Value.Count > 0 select resource.Key).ToList();
             if (notEmptyResources.Count == 0) return false;
             ResourceType resourceType = notEmptyResources[Random.Range(0, notEmptyResources.Count)];
-            unit.GatherResource(resourceType);
+            unit.Command(new ChatParser.Command(){resourceType = resourceType, commandType = ChatParser.ChatCommands.Gather});
             return true;
         }
 

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace dmdspirit
 {
@@ -10,7 +11,7 @@ namespace dmdspirit
         Barracks
     }
 
-    public class Building : MonoBehaviour, ICanBeHit
+    public class Building : MonoBehaviour
     {
         [SerializeField] private Renderer[] renderers;
 
@@ -21,26 +22,28 @@ namespace dmdspirit
 
         public bool isFinished;
         public int controlRadius = 1;
+        public float maxHP = 10f;
+        
+        public HitPoints HitPoints { get; protected set; }
 
         public Team Team { get; protected set; }
 
+        protected virtual void Awake(){}
+
         public void Initialize(Team team, bool isFinished = false)
         {
+            HitPoints = GetComponent<HitPoints>();
+            HitPoints.OnDeath += DeathHandler;
             Team = team;
             this.isFinished = isFinished;
             foreach (var renderer in renderers)
                 renderer.material.SetColor("_Color", team.teamColor);
+            HitPoints.Initialize(maxHP);
         }
 
-        // TODO: Implement building HP and stuff.
-        public void GetHit(float damage)
+        private void DeathHandler()
         {
-            return;
+            Destroy(gameObject);
         }
-
-        public bool IsAlive() => true;
-
-        // IMPROVE: Include building size to calculation.
-        public bool IsInRage(Vector3 attacker, float range) => Vector3.Distance(attacker, transform.position) <= range;
     }
 }

@@ -18,7 +18,7 @@ namespace dmdspirit
         {
             // TODO: Add events to update unit info.
             this.unit = unit;
-            unit.OnUpdateHP += UpdateHpHandler;
+            unit.HitPoints.OnHPUpdate += UpdateHpHandler;
             unit.OnOwnerChanged += OwnerChangedHandler;
             unit.OnJobChanged += JobChangedHandler;
             unit.OnDeath += DeathHandler;
@@ -34,7 +34,7 @@ namespace dmdspirit
         private void DeathHandler(Unit obj) => unitHPBar.SetProgress(0);
 
         private void OwnerChangedHandler() => unitName.text = unit.name;
-        private void UpdateHpHandler() => unitHPBar.SetProgress(unit.HP / unit.CurrentJob.maxHP);
+        private void UpdateHpHandler() => unitHPBar.SetProgress(unit.HitPoints.HP / unit.HitPoints.maxHP);
 
         private void JobChangedHandler() => jobIcon.sprite = unit.CurrentJob.icon;
     }

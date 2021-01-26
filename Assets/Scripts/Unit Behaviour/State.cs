@@ -32,8 +32,9 @@ namespace dmdspirit
             OnPushState?.Invoke(state);
         }
 
-        protected void PushMoveState(Unit unit, Vector3 moveDestination, float stopDistance)
+        protected void PushMoveState(Unit unit, Vector3 moveDestination, float stopDistance, ObjectRadius objectRadius = null)
         {
+            if (objectRadius != null) moveDestination = objectRadius.GetClosestPoint(moveDestination);
             var moveToBaseState = new MoveState(unit, moveDestination, stopDistance);
             PushState(moveToBaseState);
         }

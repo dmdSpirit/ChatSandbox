@@ -17,8 +17,9 @@ namespace dmdspirit
         private Coroutine currentAttack = null;
         private float timeSinceLastAttack = 0f;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             type = BuildingType.Tower;
             radiusCircle.localScale = Vector3.one * (attackRadius / 5f);
         }
@@ -26,16 +27,16 @@ namespace dmdspirit
         private void Update()
         {
             timeSinceLastAttack += Time.deltaTime;
-            if (isFinished == false || IsAlive() == false || currentAttack != null) return;
-            var potentialTarget = GameController.Instance.GetEnemyTeam(Team).GetAllPotentialTargets().Where(target => target.IsInRage(transform.position, attackRadius)).ToList().OrderBy(target => Vector3.Distance(transform.position, ((MonoBehaviour) target).transform.position)).FirstOrDefault();
+            if (isFinished == false || HitPoints.IsAlive == false || currentAttack != null) return;
+            var potentialTarget = GameController.Instance.GetEnemyTeam(Team).GetAllPotentialTargets().Where(target => target.IsInRange(transform.position, attackRadius)).ToList().OrderBy(target => Vector3.Distance(transform.position, ((MonoBehaviour) target).transform.position)).FirstOrDefault();
             if (potentialTarget == null) return;
             Debug.Log($"{name} has found potential target: {((MonoBehaviour) potentialTarget).name}");
             currentAttack = StartCoroutine(Attack(potentialTarget));
         }
 
-        private IEnumerator Attack(ICanBeHit target)
+        private IEnumerator Attack(HitPoints target)
         {
-            while (target != null && target.IsAlive() && target.IsInRage(transform.position, attackRadius))
+            while (target != null && target.IsAlive && target.IsInRange(transform.position, attackRadius))
             {
                 if (timeSinceLastAttack < attackCooldown)
                     yield return new WaitForSeconds(attackCooldown - timeSinceLastAttack);
