@@ -51,8 +51,18 @@ namespace dmdspirit
 
         public void GatherResource(ResourceType resourceType)
         {
+            if (resourceType == ResourceType.None)
+                return;
             StopCurrentState();
             var gatherState = new GatherState(unit, resourceType);
+            PushNewStateHandler(gatherState);
+        }
+
+        public void GatherResourceNode(ResourceNode node)
+        {
+            if (node == null) return;
+            StopCurrentState();
+            var gatherState = new GatherState(unit, node);
             PushNewStateHandler(gatherState);
         }
 

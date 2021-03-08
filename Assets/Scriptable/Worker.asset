@@ -15,11 +15,13 @@ MonoBehaviour:
   jobType: 0
   icon: {fileID: 21300000, guid: 85b5c08cd5f304b4eb3a556df2a428d6, type: 3}
   maxHP: 10
+  projectilePrefab: {fileID: 8037714061507869721, guid: 920c30f43648e4f4b8530ac77040525c, type: 3}
   damage: 1
-  attackRange: 1.2
+  attackRange: 5
   attackCooldown: 2
+  projectileSpeed: 2
   aggroRadius: 15
-  idleWalkRadius: {x: 0, y: 0}
+  idleWalkRadius: {x: 5, y: 10}
   movementSpeed: 3.5
   canGather: 1
   gatheringAmount: 1
@@ -33,3 +35,4 @@ MonoBehaviour:
   buildingNeeded: 1
   modelPrefab: {fileID: 0}
   canPatrol: 1
+  priorityGatherRadius: 30

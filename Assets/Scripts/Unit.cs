@@ -9,6 +9,7 @@ namespace dmdspirit
     [RequireComponent(typeof(UnitBehaviour), typeof(NavMeshAgent))]
     public class Unit : MonoBehaviour
     {
+
         public event Action<Unit> OnDeath;
         public event Action OnOwnerChanged;
         public event Action OnCarriedResourceChanged;
@@ -183,6 +184,15 @@ namespace dmdspirit
                     break;
             }
         }
+
+        public void ShootProjectile(HitPoints target)
+        {
+            // TODO: Pool projectiles.
+            var projectile = Instantiate(CurrentJob.projectilePrefab, transform.position, Quaternion.identity);
+            projectile.Initialize(target, CurrentJob.damage, CurrentJob.projectileSpeed, UnitTeam.teamColor);
+        }
+
+        public void GatherNode(ResourceNode node) => unitBehaviour.GatherResourceNode(node);
 
         public void StopDelivery() => unitBehaviour.StopDelivery();
     }

@@ -594,6 +594,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &5454682475348694647
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -759,7 +760,10 @@ MonoBehaviour:
   attackDamage: 0.1
   attackRadius: 15
   attackCooldown: 3
+  projectileSpeed: 3
   radiusCircle: {fileID: 8825274157488768398}
+  shootingOrigin: {fileID: 1150000961997790188}
+  projectilePrefab: {fileID: 8037714061507869721, guid: 920c30f43648e4f4b8530ac77040525c, type: 3}
 --- !u!114 &4334999112293603856
 MonoBehaviour:
   m_ObjectHideFlags: 0

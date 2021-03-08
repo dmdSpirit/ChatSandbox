@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace dmdspirit
 {
@@ -14,27 +13,8 @@ namespace dmdspirit
     }
 
     [Serializable]
-    public struct Resource
+    public struct Resource : IEquatable<Resource>
     {
-        public bool Equals(Resource other)
-        {
-            return type == other.type && value == other.value;
-        }
-
-        // FIXME: Rewrite.
-        public override bool Equals(object obj)
-        {
-            return obj is Resource other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((int) type * 397) ^ value;
-            }
-        }
-
         public ResourceType type;
         public int value;
 
@@ -44,8 +24,11 @@ namespace dmdspirit
             value = 0;
         }
 
-        public static bool operator ==(Resource a, Resource b) => a.type == b.type && a.value == b.value;
-        public static bool operator !=(Resource a, Resource b) => !(a == b);
+        public bool Equals(Resource other) => type == other.type && value == other.value;
+        public override bool Equals(object obj) => obj is Resource other && Equals(other);
+        public override int GetHashCode() => (type, value).GetHashCode();
+        public static bool operator ==(Resource a, Resource b) => a.Equals(b);
+        public static bool operator !=(Resource a, Resource b) => a.Equals(b) == false;
     }
 
     [Serializable]

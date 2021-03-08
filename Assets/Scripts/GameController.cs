@@ -16,9 +16,10 @@ namespace dmdspirit
 
     public class GameController : MonoSingleton<GameController>
     {
+        public int maxTeamSize = 4;
+        
         [SerializeField] private int joinTime = 30;
         [SerializeField] private int sessionTime = 300;
-        [SerializeField] private int maxTeamSize = 4;
         [SerializeField] private JoinUI joinUI;
         [SerializeField] private SessionTimerUI sessionTimerUI;
         [SerializeField] private ResultsUI resultsUI;
@@ -35,6 +36,8 @@ namespace dmdspirit
         private bool isSessionRunning = false;
 
         public List<BuildingType> CanBeBuild { get; private set; }
+        
+        // TODO: Different logging settings.
 
         public void StartGame()
         {

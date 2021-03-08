@@ -20,7 +20,6 @@ namespace dmdspirit
 
         [SerializeField] private TeamUI ui;
         [SerializeField] private Unit unitPrefab = default;
-        [SerializeField] private float spawnCooldown = 1f;
         [SerializeField] private float respawnTimer = 15;
 
         public List<Unit> Units { get; private set; }
@@ -44,7 +43,7 @@ namespace dmdspirit
             buildings = new List<Building>();
             constructionSites = new List<ConstructionSite>();
             buildings.Add(baseBuilding);
-            StartCoroutine(SpawnUnits(players, maxUnitCount));
+            SpawnUnits(players, maxUnitCount);
             ui.gameObject.SetActive(true);
             storedResources = new ResourceCollection();
             ui.Initialize(this);
@@ -57,6 +56,29 @@ namespace dmdspirit
             }
 
             Map.Instance.AddTeamControl(this, baseTile, baseBuilding.controlRadius);
+        }
+        
+        private void SpawnUnits(List<string> players, int maxUnitCount)
+        {
+            Units = new List<Unit>();
+            for (var i = 0; i < maxUnitCount; i++)
+            {
+                var isPlayerUnit = i < players.Count;
+                var unitName = isPlayerUnit? players[i]:string.Empty;
+                var unit = SpawnUnit(i, unitName);
+                Units.Add(unit);
+                if (isPlayerUnit)
+                    GameController.Instance.RegisterPlayerUnit(players[i], unit);
+                OnUnitAdded?.Invoke(unit);
+            }
+        }
+
+        private Unit SpawnUnit(int unitId, string unitName)
+        {
+            var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
+            unit.OnDeath += UnitDeathHandler;
+            unit.Initialize(this, unitId, teamColor, unitName);
+            return unit;
         }
 
         public List<HitPoints> GetAllPotentialTargets()
@@ -110,31 +132,6 @@ namespace dmdspirit
             buildings.Add(building);
             constructionSite.DestroySite();
             Map.Instance.AddTeamControl(this, constructionSite.Tile, building.controlRadius);
-        }
-
-        private IEnumerator SpawnUnits(List<string> players, int maxUnitCount)
-        {
-            yield return new WaitForSeconds(spawnCooldown);
-            Units = new List<Unit>();
-            // BUG: Not handled correctly if someone !join while units are spawning.
-            for (var i = 0; i < maxUnitCount; i++)
-            {
-                var unit = Instantiate(unitPrefab, baseBuilding.entrance.position, Quaternion.identity, transform);
-                Units.Add(unit);
-                unit.OnDeath += UnitDeathHandler;
-                var isPlayerUnit = i < players.Count;
-                var unitName = string.Empty;
-                if (isPlayerUnit)
-                {
-                    unitName = players[i];
-                    GameController.Instance.RegisterPlayerUnit(players[i], unit);
-                }
-
-                unit.Initialize(this, i, teamColor, unitName);
-
-                OnUnitAdded?.Invoke(unit);
-                yield return new WaitForSeconds(spawnCooldown);
-            }
         }
 
         private IEnumerator RespawnUnit(Unit unit)

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.WSA;
 
 namespace dmdspirit
 {
@@ -131,6 +131,28 @@ namespace dmdspirit
             var result = mapTiles[position.x, position.y];
             if (result == null)
                 Debug.LogError($"Empty map tile in map bounds. {position.ToString()}");
+            return result;
+        }
+
+        public Dictionary<ResourceNode, float> GetClosestToPositionResourceNodes(Vector3 position)
+        {
+            var result = new Dictionary<ResourceNode, float>();
+            var resourceTypes = resources.Keys.ToArray();
+            foreach (var resourceType in resourceTypes)
+            {
+                ResourceNode closestNode = null;
+                var minDistance = float.MaxValue;
+                var possibleResources = resources[resourceType];
+                foreach (var resource in possibleResources)
+                {
+                    if(resource.isAlive==false) continue;
+                    var distance = Vector3.Distance(position, resource.transform.position);
+                    if (distance > minDistance) continue;
+                    minDistance = distance;
+                    closestNode = resource;
+                }
+                result.Add(closestNode, minDistance);
+            }
             return result;
         }
 

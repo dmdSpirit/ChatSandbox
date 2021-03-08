@@ -10,7 +10,10 @@ namespace dmdspirit
         [SerializeField] private float attackDamage;
         [SerializeField] private float attackRadius;
         [SerializeField] private float attackCooldown;
+        [SerializeField] private float projectileSpeed;
         [SerializeField] private Transform radiusCircle;
+        [SerializeField] private Transform shootingOrigin;
+        [SerializeField] private Projectile projectilePrefab;
 
         // TODO: Create projectile to show attack.
 
@@ -28,9 +31,9 @@ namespace dmdspirit
         {
             timeSinceLastAttack += Time.deltaTime;
             if (isFinished == false || HitPoints.IsAlive == false || currentAttack != null) return;
-            var potentialTarget = GameController.Instance.GetEnemyTeam(Team).GetAllPotentialTargets().Where(target => target.IsInRange(transform.position, attackRadius)).ToList().OrderBy(target => Vector3.Distance(transform.position, ((MonoBehaviour) target).transform.position)).FirstOrDefault();
+            var potentialTarget = GameController.Instance.GetEnemyTeam(Team).GetAllPotentialTargets().Where(target => target.IsInRange(transform.position, attackRadius)).ToList().OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).FirstOrDefault();
             if (potentialTarget == null) return;
-            Debug.Log($"{name} has found potential target: {((MonoBehaviour) potentialTarget).name}");
+            Debug.Log($"{name} has found potential target: {potentialTarget.name}");
             currentAttack = StartCoroutine(Attack(potentialTarget));
         }
 
@@ -40,13 +43,18 @@ namespace dmdspirit
             {
                 if (timeSinceLastAttack < attackCooldown)
                     yield return new WaitForSeconds(attackCooldown - timeSinceLastAttack);
-                // TODO: Spawn projectile.
-                target.GetHit(attackDamage);
+                ShootProjectile(target);
                 timeSinceLastAttack = 0;
                 yield return new WaitForSeconds(attackCooldown);
             }
 
             currentAttack = null;
+        }
+
+        private void ShootProjectile(HitPoints target)
+        {
+            var projectile = Instantiate(projectilePrefab, shootingOrigin.position, Quaternion.identity);
+            projectile.Initialize(target, attackDamage, projectileSpeed, Team.teamColor);
         }
     }
 }

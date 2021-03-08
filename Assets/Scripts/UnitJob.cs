@@ -14,9 +14,11 @@ namespace dmdspirit
         public UnitJobType jobType;
         public Sprite icon;
         public float maxHP;
+        public Projectile projectilePrefab;
         public float damage;
         public float attackRange;
         public float attackCooldown;
+        public float projectileSpeed;
         public float aggroRadius;
         public Vector2 idleWalkRadius;
         public float movementSpeed;
@@ -33,5 +35,6 @@ namespace dmdspirit
         public BuildingType buildingNeeded;
         public GameObject modelPrefab;
         public bool canPatrol;
+        public float priorityGatherRadius = 40f;
     }
 }

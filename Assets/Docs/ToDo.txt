@@ -7,16 +7,20 @@
     + !build a2 (takes 1 parameter and commands unit to work on construction site in a2 if there is any)
 + Commands for bots (specify a sector to work in)
     + !bot team index command
-+ fix: Build site progress bar is rotated with the bulding
++ fix: Build site progress bar is rotated with the building
 + Finish building site that was left by builder
 + build zone (sc pylon or radius around any building)
 + FIX: Tower is not attacking units
 + Units can attack buildings
 + !kill userName (attack userName if unit is found in agro radius)
++ Spawn all units at the same time
 
+- [Fix situations like: bots suicide running to enemy base for more wood] 
+        When bot is searching for next resource, also consider distance.
+- [What problem am I solving?] 
+        Move unit handling from Team to UnitController
 - Building/ConstructionSite destruction
 - For all state distances (gathering distance) also add distance component from target (stone radius > tree radius => should gather from different distance)
-
 - Repair (no resources needed)
 - Update win condition
 - Rework ResultsUI
@@ -34,6 +38,7 @@
 ------------------------------
 Future:
 - MOBA (base economy + arena fighting)
+- [Commands are turning into a mess] <No Solution>
 - stream overlay buttons as command shortcuts
 - Rework coordinate system
 - Commands getting too complicated? (bots commands only for testing though)       

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
 
 namespace dmdspirit
 {
@@ -20,7 +19,7 @@ namespace dmdspirit
         {
             // BUG: Units are constantly starting attackState while in combat. 
             this.unit = unit;
-            Debug.Log($"{unit.name} started attacking {((MonoBehaviour)target).name}.");
+            Debug.Log($"{unit.name} started attacking {target.name}.");
             this.target = target;
             targetRadius = target.GetComponent<ObjectRadius>();
         }
@@ -60,6 +59,7 @@ namespace dmdspirit
         private void Attack()
         {
             unit.DealDamage(target);
+            unit.ShootProjectile(target);
             attackTimer = AttackCooldown;
         }
 

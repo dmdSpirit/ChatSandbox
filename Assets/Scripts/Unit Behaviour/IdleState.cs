@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -27,10 +28,31 @@ namespace dmdspirit
         private bool GatherSomething()
         {
             if (unit.CurrentJob.canGather == false) return false;
-            var notEmptyResources = (from resource in Map.Instance.resources where resource.Value.Count > 0 select resource.Key).ToList();
-            if (notEmptyResources.Count == 0) return false;
-            ResourceType resourceType = notEmptyResources[Random.Range(0, notEmptyResources.Count)];
-            unit.Command(new ChatParser.Command(){resourceType = resourceType, commandType = ChatParser.ChatCommands.Gather});
+            var basePosition = unit.UnitTeam.baseBuilding.transform.position;
+            var priorityGatherRadius = unit.CurrentJob.priorityGatherRadius;
+            var possibleResourceNodes = Map.Instance.GetClosestToPositionResourceNodes(basePosition);
+            if (possibleResourceNodes.Count == 0) return false;
+            var priorityNodes = possibleResourceNodes
+                .Where(p => p.Value <= priorityGatherRadius)
+                .Select(p => p.Key)
+                .ToList();
+
+            foreach (var possibleResourceNodePair in possibleResourceNodes)
+            {
+                if (possibleResourceNodePair.Value > priorityGatherRadius) continue;
+                priorityNodes.Add(possibleResourceNodePair.Key);
+            }
+
+            ResourceNode resourceToGather = null;
+            if (priorityNodes.Count != 0)
+                resourceToGather = priorityNodes[Random.Range(0, priorityNodes.Count)];
+            else
+                resourceToGather = possibleResourceNodes
+                    .OrderBy(p => p.Value)
+                    .Select(p => p.Key)
+                    .FirstOrDefault();
+            if (resourceToGather == null) return false;
+            unit.GatherNode(resourceToGather);
             return true;
         }
 
