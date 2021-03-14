@@ -19,7 +19,6 @@ namespace dmdspirit
 
         public override void Update()
         {
-            if (gatherNodeState != null) return;
             var basePosition = unit.UnitTeam.baseBuilding.transform.position;
             var priorityGatherRadius = unit.CurrentJob.priorityGatherRadius;
             var possibleResourceNodes = Map.Instance.GetResourceNodesOfType(resourceType);

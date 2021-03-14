@@ -14,10 +14,9 @@ namespace dmdspirit
 
         private void Update()
         {
-            // HACK:
             if (unit.HitPoints.IsAlive == false) return;
-            searchForEnemiesState?.Update();
-            // TODO: Handle empty state stack.
+            if (stateStack.Count == 0 || stateStack.Peek() is AttackState == false)
+                searchForEnemiesState?.Update();
             if (stateStack.Count != 0)
                 stateStack.Peek().Update();
             else
@@ -38,9 +37,25 @@ namespace dmdspirit
 
         private void DeathHandler(Unit unit)
         {
-            StopCurrentState();
+            ClearStack();
             searchForEnemiesState.StopState();
             searchForEnemiesState = null;
+        }
+
+        private void ClearStack()
+        {
+            while(stateStack.Count!=0)
+                StopCurrentState();
+        }
+
+        private void ClearMovementFromStack()
+        {
+            while (stateStack.Count != 0)
+            {
+                var state = stateStack.Peek();
+                if (state is MoveState == false && state is ChaseState == false) return;
+                state.StopState(false);
+            } 
         }
 
         public void Respawn()
@@ -86,9 +101,8 @@ namespace dmdspirit
 
         public void AttackTarget(HitPoints target)
         {
-            // HACK: Clearing stack to fix strange behaviour causing 
-            while(stateStack.Count!=0)
-                StopCurrentState();
+            // HACK: Clearing stack to fix strange behaviour causing
+            ClearMovementFromStack();
             var attackState = new AttackState(unit, target);
             attackState.OnStateFinish += (x) => StartSearchingForEnemies();
             PushNewStateHandler(attackState);

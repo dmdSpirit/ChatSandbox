@@ -21,9 +21,6 @@ namespace dmdspirit
 
         public override void Update()
         {
-            if (isReturningResources && moveState != null)
-                return;
-            
             if (nodeHasDepleted)
             {
                 moveState?.StopState(false);
@@ -32,9 +29,6 @@ namespace dmdspirit
                 StopState();
                 return;
             }
-
-            if (moveState != null)
-                return;
 
             if (unit.carriedResource.type!= ResourceType.None && unit.carriedResource.type != node.Type || unit.carriedResource.value >= unit.CurrentJob.maxCarryingCapacity)
             {

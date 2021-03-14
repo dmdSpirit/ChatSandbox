@@ -21,8 +21,6 @@ namespace dmdspirit
 
         public override void Update()
         {
-            if (gatherState!=null || moveState!=null)
-                return;
             if (GatherSomething()) return;
             if (unit.carriedResource.type != ResourceType.None && unit.carriedResource.value > 0)
                 ReturnResources();

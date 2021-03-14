@@ -28,8 +28,6 @@ namespace dmdspirit
                 return;
             }
 
-            if (chaseState != null) return;
-
             var targetPosition = targetRadius == null ? target.transform.position : targetRadius.GetClosestPoint(target.transform.position);
             var distance = Vector3.Distance(unit.transform.position, targetPosition);
             if (distance > unit.CurrentJob.attackRange)

@@ -757,7 +757,7 @@ MonoBehaviour:
   isFinished: 0
   controlRadius: 2
   maxHP: 10
-  attackDamage: 0.1
+  attackDamage: 5
   attackRadius: 15
   attackCooldown: 3
   projectileSpeed: 3
@@ -777,6 +777,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   HPBar: {fileID: 2342272378949495400}
+  radius: 0
 --- !u!114 &6568372055244430639
 MonoBehaviour:
   m_ObjectHideFlags: 0

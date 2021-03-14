@@ -39,6 +39,20 @@ namespace dmdspirit
         
         // TODO: Different logging settings.
 
+        private void Start()
+        {
+#if UNITY_STANDALONE_WIN
+            StartCoroutine(DelayedStart());
+#endif
+        }
+
+        // HACK: For testing only.
+        private IEnumerator DelayedStart()
+        {
+            yield return new WaitForSeconds(5);
+            StartGame();
+        }
+
         public void StartGame()
         {
             CanBeBuild = new List<BuildingType>() {BuildingType.Tower, BuildingType.Barracks};
