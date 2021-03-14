@@ -17,6 +17,7 @@ namespace dmdspirit
     {
         public ResourceType type;
         public int value;
+        private static ResourceType[] types;
 
         public void Clear()
         {
@@ -29,6 +30,13 @@ namespace dmdspirit
         public override int GetHashCode() => (type, value).GetHashCode();
         public static bool operator ==(Resource a, Resource b) => a.Equals(b);
         public static bool operator !=(Resource a, Resource b) => a.Equals(b) == false;
+
+        public static ResourceType[] GetResourceTypes()
+        {
+            if (types != null) return types;
+            types = Enum.GetValues(typeof(ResourceType)).Cast<ResourceType>().Where(resourceType => resourceType != ResourceType.None).ToArray();
+            return types;
+        }
     }
 
     [Serializable]

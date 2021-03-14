@@ -40,6 +40,8 @@ namespace dmdspirit
         private IEnumerator Attack(HitPoints target)
         {
             while (target != null && target.IsAlive && target.IsInRange(transform.position, attackRadius))
+                
+                
             {
                 if (timeSinceLastAttack < attackCooldown)
                     yield return new WaitForSeconds(attackCooldown - timeSinceLastAttack);

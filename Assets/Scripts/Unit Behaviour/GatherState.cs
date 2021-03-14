@@ -1,138 +1,48 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace dmdspirit
 {
     public class GatherState : State
     {
         private Unit unit;
-        private ResourceNode target;
         private ResourceType resourceType;
-        private float gatheringTimer = 0f;
+        private ResourceNode resourceNode;
+        private GatherNodeState gatherNodeState;
 
-        private UnitJob Job => unit.CurrentJob;
-        private MoveState moveState;
-
-        public GatherState(Unit unit, ResourceType resourceType) : this(unit)
-        {
-            this.resourceType = resourceType;
-            target = null;
-        }
-
-        public GatherState(Unit unit, ResourceNode node) : this(unit)
-        {
-            target = node;
-            resourceType = node.value.type;
-        }
-
-        private GatherState(Unit unit)
+        public GatherState(Unit unit, ResourceType resourceType)
         {
             this.unit = unit;
-            if (unit.IsPlayer)
-                Debug.Log($"{unit.gameObject.name} started gather state for {resourceType.ToString()}.");
-        }
-
-        private void SetTarget(ResourceNode node)
-        {
-            if (target != null)
-                target.OnResourceDepleted -= ResourceDepletedHandler;
-            resourceType = node.value.type;
-            target = node;
-            target.OnResourceDepleted += ResourceDepletedHandler;
-        }
-
-        // [Is it so important right now?]
-        // TODO: Interrupt unit movement/resource gathering if resource node is depleted.
-
-        // [Unit should not be able to change job mid state, unless for some debug purposes]
-        // TODO: Do not store values like max carrying capacity, cause we don't know if unit can change job mid state.
-
-        private void ResourceDepletedHandler(ResourceNode node)
-        {
-            moveState?.StopState(false);
-            target = null;
-        }
-
-        public override void StopState(bool stopParent = true)
-        {
-            if (target != null)
-                target.OnResourceDepleted -= ResourceDepletedHandler;
-            base.StopState(stopParent);
+            this.resourceType = resourceType;
         }
 
         public override void Update()
         {
-            if (moveState != null) return;
-            if (unit.carriedResource.value >= Job.maxCarryingCapacity || (unit.carriedResource.type != resourceType && unit.carriedResource.type != ResourceType.None))
+            if (gatherNodeState != null) return;
+            var basePosition = unit.UnitTeam.baseBuilding.transform.position;
+            var priorityGatherRadius = unit.CurrentJob.priorityGatherRadius;
+            var possibleResourceNodes = Map.Instance.GetResourceNodesOfType(resourceType);
+            if (possibleResourceNodes.Count == 0)
             {
-                ReturnResources();
+                StopState();
                 return;
             }
 
-            // HACK: Depleted nodes can still return non null target.
-            if (target == null || target.value.value == 0)
-            {
-                SearchForTarget();
-                return;
-            }
-
-            if (Vector3.Distance(unit.transform.position, target.transform.position) > Job.gatheringDistance)
-            {
-                PushMoveState(unit, target.transform.position, Job.gatheringDistance);
-            }
+            var nodeDistances = possibleResourceNodes.ToDictionary(node => node, node => Vector3.Distance(node.transform.position, basePosition));
+            var nodesToChooseFrom = nodeDistances.Where(n => n.Value <= priorityGatherRadius).Select(k => k.Key).ToList();
+            if (nodesToChooseFrom.Count == 0)
+                resourceNode = nodeDistances.OrderBy(n => n.Value).First().Key;
             else
-            {
-                if (gatheringTimer >= Job.gatheringCooldown)
-                {
-                    var desiredValue = Mathf.Min(Job.gatheringAmount, Job.maxCarryingCapacity - unit.carriedResource.value);
-                    var gatheredAmount = target.GatherResource(desiredValue);
-                    unit.AddResource(resourceType, gatheredAmount);
-                    if (unit.carriedResource.type == ResourceType.None)
-                        unit.carriedResource.type = target.value.type;
-                    gatheringTimer = 0;
-                }
-
-                gatheringTimer += Time.deltaTime;
-            }
+                resourceNode = nodesToChooseFrom[Random.Range(0, nodesToChooseFrom.Count)];
+            gatherNodeState = new GatherNodeState(unit, resourceNode);
+            gatherNodeState.OnStateFinish += GatherNodeStateFinishedHandler;
+            PushState(gatherNodeState);
         }
 
-        private void ReturnResources()
+        private void GatherNodeStateFinishedHandler(State state)
         {
-            var baseEntrancePosition = unit.UnitTeam.baseBuilding.entrance.position;
-            if (Vector3.Distance(baseEntrancePosition, unit.transform.position) <= Job.gatheringDistance)
-            {
-                unit.LoadResourcesToBase();
-                return;
-            }
-
-            PushMoveState(unit, baseEntrancePosition, Job.gatheringDistance);
-        }
-
-        // TODO: Rewrite using distance priority logic.
-        private void SearchForTarget()
-        {
-            var possibleResources = Map.Instance.GetClosestToPositionResourceNodes(unit.UnitTeam.baseBuilding.transform.position);
-            // var possibleResources = Map.Instance.resources[resourceType];
-            // // FIXME: Check before searching. And may be I should send unit to gather other resources instead.
-            // if (possibleResources.Count == 0)
-            // {
-            //     if (unit.carriedResource.value == 0)
-            //         StopState();
-            //     else
-            //         ReturnResources();
-            //     return;
-            // }
-            //
-            // // TODO: Check if there are no resources of needed type on the map left. 
-            // var distance = Mathf.Infinity;
-            // foreach (var possibleResource in possibleResources)
-            // {
-            //     var newDistance = Vector3.Distance(unit.transform.position, possibleResource.transform.position);
-            //     if (newDistance < distance)
-            //     {
-            //         target = possibleResource;
-            //         distance = newDistance;
-            //     }
-            // }
+            gatherNodeState = null;
         }
     }
 }

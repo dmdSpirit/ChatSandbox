@@ -35,4 +35,4 @@ MonoBehaviour:
   buildingNeeded: 1
   modelPrefab: {fileID: 0}
   canPatrol: 1
-  priorityGatherRadius: 30
+  priorityGatherRadius: 50

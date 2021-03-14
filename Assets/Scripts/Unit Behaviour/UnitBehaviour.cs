@@ -62,7 +62,7 @@ namespace dmdspirit
         {
             if (node == null) return;
             StopCurrentState();
-            var gatherState = new GatherState(unit, node);
+            var gatherState = new GatherNodeState(unit, node);
             PushNewStateHandler(gatherState);
         }
 

@@ -1,20 +1,43 @@
-﻿v3 (building) 18.01.2021
+﻿v3 14.03.2021
+Finish playable version to publish.
 
-+ !move a2
-+ !build 'where' 'what' 'direction'
-+ building site (units have to carry resources needed for building to the building site to finish building)
-+ Update commands
-    + !build a2 (takes 1 parameter and commands unit to work on construction site in a2 if there is any)
-+ Commands for bots (specify a sector to work in)
-    + !bot team index command
-+ fix: Build site progress bar is rotated with the building
-+ Finish building site that was left by builder
-+ build zone (sc pylon or radius around any building)
-+ FIX: Tower is not attacking units
-+ Units can attack buildings
-+ !kill userName (attack userName if unit is found in agro radius)
-+ Spawn all units at the same time
++ Fix gather state
+- Return resources if there is nothing else to gather on map
+- Fix units getting stuck after combat
+- Start game
+    - Build project to check it working as a standalone
+- Player join
+    - Rework game start UI
+- Help
+    - More verbose help
+    - Chat command errors.
+- Win condition
+- Gameplay footage 
+- itch.io publish
+    - Bot login (Do not store credentials in program)
 
+------------------------------
+
+Future ideas:
+- MOBA (base economy + arena fighting)
+- [Commands are turning into a mess] <No Solution>
+- stream overlay buttons as command shortcuts
+- Rework coordinate system
+- Commands getting too complicated? (bots commands only for testing though)       
+- Different speed for idle walking, chasing, carrying resources and so on
+- Bot units get commands from the team priority list (get resources/build).
+- Range attacks and jobs (mage/archer)
+- Bots getting stuck in the building while idle walking
+- BAN LIST
+- Unit should be able override delivery if it has resources needed right now.
+- Figure a way to remove units collision with each other
+- Map generation
+- User database
+    - user id consistency
+- Plant trees
+- Stop using NavMesh. (Check Pathfinder: Kingmaker game code for other navigation system)
+- Show current task icon or visualize path
+- Rework unit/unitBehaviour classes interaction with chat commands.
 - [Fix situations like: bots suicide running to enemy base for more wood] 
         When bot is searching for next resource, also consider distance.
 - [What problem am I solving?] 
@@ -31,32 +54,6 @@
 - Test for 10-15 units in team
 - More verbose help && command error messages to users
 - Refactor/clear code (TODOs and so on)
-
---------------------------
-- Gameplay footage 
-
-------------------------------
-Future:
-- MOBA (base economy + arena fighting)
-- [Commands are turning into a mess] <No Solution>
-- stream overlay buttons as command shortcuts
-- Rework coordinate system
-- Commands getting too complicated? (bots commands only for testing though)       
-- Different speed for idle walking, chasing, carrying resources and so on
-- Bot units get commands from the team priority list (get resources/build).
-- Chat command errors.
-- Rage attacks and jobs (mage/archer)
-- Bots getting stuck in the building while idle walking
-- BAN LIST
-- Unit should be able override delivery if it has resources needed right now.
-- Figure a way to remove units collision with each other
-- Map generation
-- User database
-    - user id consistency
-- Plant trees
-- Stop using NavMesh. (Check Pathfinder: Kingmaker game code for other navigation system)
-- Show current task icon or visualize path
-- Rework unit/unitBehaviour classes interaction with chat commands.
 
 ------------------------------
 ------------------------------
@@ -121,3 +118,20 @@ v2 14.12.2020  (war)
 + Show resource icon if unit is carrying something
 + !patrol a1 z9
 + Unit respawn
+
+v2.1 (building) 18.01.2021
+
++ !move a2
++ !build 'where' 'what' 'direction'
++ building site (units have to carry resources needed for building to the building site to finish building)
++ Update commands
+    + !build a2 (takes 1 parameter and commands unit to work on construction site in a2 if there is any)
++ Commands for bots (specify a sector to work in)
+    + !bot team index command
++ fix: Build site progress bar is rotated with the building
++ Finish building site that was left by builder
++ build zone (sc pylon or radius around any building)
++ FIX: Tower is not attacking units
++ Units can attack buildings
++ !kill userName (attack userName if unit is found in agro radius)
++ Spawn all units at the same time

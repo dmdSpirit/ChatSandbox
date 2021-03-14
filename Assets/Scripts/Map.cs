@@ -50,13 +50,7 @@ namespace dmdspirit
 
         private void Awake()
         {
-            resources = new Dictionary<ResourceType, List<ResourceNode>>();
-            foreach (ResourceType resourceType in Enum.GetValues(typeof(ResourceType)))
-            {
-                if (resourceType == ResourceType.None) continue;
-                resources.Add(resourceType, new List<ResourceNode>());
-            }
-
+            resources = Resource.GetResourceTypes().ToDictionary(resource => resource, resource=> new List<ResourceNode>());
             tiles = new List<MapTile>();
         }
 
@@ -134,27 +128,7 @@ namespace dmdspirit
             return result;
         }
 
-        public Dictionary<ResourceNode, float> GetClosestToPositionResourceNodes(Vector3 position)
-        {
-            var result = new Dictionary<ResourceNode, float>();
-            var resourceTypes = resources.Keys.ToArray();
-            foreach (var resourceType in resourceTypes)
-            {
-                ResourceNode closestNode = null;
-                var minDistance = float.MaxValue;
-                var possibleResources = resources[resourceType];
-                foreach (var resource in possibleResources)
-                {
-                    if(resource.isAlive==false) continue;
-                    var distance = Vector3.Distance(position, resource.transform.position);
-                    if (distance > minDistance) continue;
-                    minDistance = distance;
-                    closestNode = resource;
-                }
-                result.Add(closestNode, minDistance);
-            }
-            return result;
-        }
+        public List<ResourceNode> GetResourceNodesOfType(ResourceType type) => resources[type].Where(r => r.isAlive).ToList();
 
         private void ProcessTiles()
         {

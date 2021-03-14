@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -10,9 +11,9 @@ namespace dmdspirit
         private Unit unit;
 
         private Vector2 IdleWalkRadius => unit.CurrentJob.idleWalkRadius;
+        private GatherState gatherState;
+        private MoveState moveState;
 
-        // TODO: Add minimal idle walk radius.
-        // TODO: Adjust idle walk speed.
         public IdleState(Unit unit)
         {
             this.unit = unit;
@@ -20,47 +21,66 @@ namespace dmdspirit
 
         public override void Update()
         {
-            // TODO: Get next command from command priority list in Team.
-            if (unit.IsPlayer || GatherSomething() == false)
+            if (gatherState!=null || moveState!=null)
+                return;
+            if (GatherSomething()==false)
                 WalkSomewhere();
         }
-
+        
         private bool GatherSomething()
         {
-            if (unit.CurrentJob.canGather == false) return false;
-            var basePosition = unit.UnitTeam.baseBuilding.transform.position;
+            var resourceTypes = Resource.GetResourceTypes();
             var priorityGatherRadius = unit.CurrentJob.priorityGatherRadius;
-            var possibleResourceNodes = Map.Instance.GetClosestToPositionResourceNodes(basePosition);
-            if (possibleResourceNodes.Count == 0) return false;
-            var priorityNodes = possibleResourceNodes
-                .Where(p => p.Value <= priorityGatherRadius)
-                .Select(p => p.Key)
-                .ToList();
-
-            foreach (var possibleResourceNodePair in possibleResourceNodes)
+            var basePosition = unit.UnitTeam.baseBuilding.transform.position;
+            var nodesInPriorityRadius = resourceTypes.ToDictionary(type => type, type => Map.Instance.GetResourceNodesOfType(type).Where(node => Vector3.Distance(basePosition, node.transform.position) <= priorityGatherRadius));
+            var possibleTypesToGather = nodesInPriorityRadius.Where(n => n.Value.Any()).Select(n => n.Key).Distinct().ToArray();
+            ResourceType typeToGather;
+            if (possibleTypesToGather.Contains(unit.carriedResource.type))
+                typeToGather = unit.carriedResource.type;
+            else if (possibleTypesToGather.Length == 0)
             {
-                if (possibleResourceNodePair.Value > priorityGatherRadius) continue;
-                priorityNodes.Add(possibleResourceNodePair.Key);
-            }
+                // Find closest resource type.
+                var resourceNodes = new List<ResourceNode>();
+                foreach (var type in resourceTypes)
+                    resourceNodes.AddRange(Map.Instance.GetResourceNodesOfType(type));
+                if (resourceNodes.Count == 0)
+                    return false;
+                ResourceNode closestNode = null;
+                var minDistance = float.MaxValue;
+                foreach (var node in resourceNodes)
+                {
+                    var distance = Vector3.Distance(node.transform.position, basePosition);
+                    if (!(distance < minDistance)) continue;
+                    closestNode = node;
+                    minDistance = distance;
+                }
 
-            ResourceNode resourceToGather = null;
-            if (priorityNodes.Count != 0)
-                resourceToGather = priorityNodes[Random.Range(0, priorityNodes.Count)];
+                typeToGather = closestNode.Type;
+            }
             else
-                resourceToGather = possibleResourceNodes
-                    .OrderBy(p => p.Value)
-                    .Select(p => p.Key)
-                    .FirstOrDefault();
-            if (resourceToGather == null) return false;
-            unit.GatherNode(resourceToGather);
+                typeToGather = possibleTypesToGather[Random.Range(0, possibleTypesToGather.Length)];
+            gatherState = new GatherState(unit, typeToGather);
+            gatherState.OnStateFinish += GatherStateFinishedHandler;
+            PushState(gatherState);
             return true;
+        }
+
+        private void GatherStateFinishedHandler(State state)
+        {
+            gatherState = null;
+        }
+
+        private void MoveStateFinishedHandler(State state)
+        {
+            moveState = null;
         }
 
         private void WalkSomewhere()
         {
             var direction = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)) * Random.Range(IdleWalkRadius.x, IdleWalkRadius.y);
             var target = unit.transform.position + direction;
-            var moveState = new MoveState(unit, target, 0.1f);
+            moveState = new MoveState(unit, target, 0.1f);
+            moveState.OnStateFinish += MoveStateFinishedHandler;
             PushState(moveState);
         }
     }

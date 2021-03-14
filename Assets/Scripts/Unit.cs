@@ -158,8 +158,7 @@ namespace dmdspirit
             switch (command.commandType)
             {
                 case ChatParser.ChatCommands.Gather:
-                    if (CurrentJob.canGather == false) return;
-                    unitBehaviour.GatherResource(command.resourceType);
+                    GatherResource(command.resourceType);
                     break;
                 case ChatParser.ChatCommands.Build:
                     if (CurrentJob.canBuild == false) return;
@@ -192,7 +191,17 @@ namespace dmdspirit
             projectile.Initialize(target, CurrentJob.damage, CurrentJob.projectileSpeed, UnitTeam.teamColor);
         }
 
-        public void GatherNode(ResourceNode node) => unitBehaviour.GatherResourceNode(node);
+        public void GatherNode(ResourceNode node)
+        {
+            if (CurrentJob.canGather == false) return;
+            unitBehaviour.GatherResourceNode(node);
+        }
+
+        public void GatherResource(ResourceType type)
+        {
+            if (CurrentJob.canGather == false) return;
+            unitBehaviour.GatherResource(type);
+        }
 
         public void StopDelivery() => unitBehaviour.StopDelivery();
     }

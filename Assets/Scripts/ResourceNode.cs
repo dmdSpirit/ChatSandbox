@@ -10,6 +10,7 @@ namespace dmdspirit
 
         public Resource value;
         public bool isAlive { get; private set; }
+        public ResourceType Type => value.type;
 
         private void Start()
         {
