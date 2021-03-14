@@ -86,6 +86,9 @@ namespace dmdspirit
 
         public void AttackTarget(HitPoints target)
         {
+            // HACK: Clearing stack to fix strange behaviour causing 
+            while(stateStack.Count!=0)
+                StopCurrentState();
             var attackState = new AttackState(unit, target);
             attackState.OnStateFinish += (x) => StartSearchingForEnemies();
             PushNewStateHandler(attackState);

@@ -83,6 +83,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   HPBar: {fileID: 7413395843589854990}
+  radius: 0.6
 --- !u!195 &4449047809546455985
 NavMeshAgent:
   m_ObjectHideFlags: 0

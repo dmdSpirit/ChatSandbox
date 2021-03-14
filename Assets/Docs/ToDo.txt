@@ -2,12 +2,13 @@
 Finish playable version to publish.
 
 + Fix gather state
-- Return resources if there is nothing else to gather on map
-- Fix units getting stuck after combat
++ Return resources if there is nothing else to gather on map
++ Fix units getting stuck after combat
 - Start game
     - Build project to check it working as a standalone
 - Player join
     - Rework game start UI
+- Create Unit panel UI
 - Help
     - More verbose help
     - Chat command errors.

@@ -150,8 +150,6 @@ namespace dmdspirit
 
         public void AttackTarget(HitPoints target) => unitBehaviour.AttackTarget(target);
 
-        public void DealDamage(HitPoints target) => target.GetHit(CurrentJob.damage);
-
         public void Command(ChatParser.Command command)
         {
             if (HitPoints.IsAlive == false) return;

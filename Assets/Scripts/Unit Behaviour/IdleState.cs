@@ -23,8 +23,23 @@ namespace dmdspirit
         {
             if (gatherState!=null || moveState!=null)
                 return;
-            if (GatherSomething()==false)
+            if (GatherSomething()) return;
+            if (unit.carriedResource.type != ResourceType.None && unit.carriedResource.value > 0)
+                ReturnResources();
+            else
                 WalkSomewhere();
+        }
+
+        private void ReturnResources()
+        {
+            moveState = PushMoveState(unit, unit.UnitTeam.baseBuilding.entrance.position, unit.CurrentJob.gatheringDistance);
+            moveState.OnStateFinish += MoveToBaseFinishedHandler;
+        }
+
+        private void MoveToBaseFinishedHandler(State state)
+        {
+            unit.LoadResourcesToBase();
+            MoveStateFinishedHandler(state);
         }
         
         private bool GatherSomething()

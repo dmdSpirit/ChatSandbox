@@ -9,21 +9,13 @@ namespace dmdspirit
         public event Action OnHPUpdate;
 
         [SerializeField] private ProgressBar HPBar;
+        // HACK: To move from using colliders.
+        public float radius=.5f;
 
         public float HP { get; private set; }
         public float maxHP { get; private set; }
 
         public bool IsAlive => HP > 0;
-
-        // HACK: ??
-        public bool CanMove => unit != null;
-
-        private Unit unit;
-
-        private void Start()
-        {
-            unit = GetComponent<Unit>();
-        }
 
         public void Initialize(float maxHP)
         {

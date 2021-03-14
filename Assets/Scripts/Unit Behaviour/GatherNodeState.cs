@@ -80,10 +80,6 @@ namespace dmdspirit
         private void ResourceDepletedHandler(ResourceNode depletedNode)
         {
             nodeHasDepleted = true;
-            // moveState?.StopState(false);
-            // moveState = null;
-            // node = null;
-            // StopState();
         }
 
         private void MoveToBaseStateFinishedHandler(State state)

@@ -8,16 +8,10 @@ namespace dmdspirit
         private ObjectRadius targetRadius;
         private HitPoints target;
         private float attackTimer = 0;
-        private const float shortChase = 2f;
-
-        private float AttackRange => unit.CurrentJob.attackRange;
-        private float AttackCooldown => unit.CurrentJob.attackCooldown;
-
-        // HACK: This fixes unit resetting attack cd when its target is pushed away.
+        private ChaseState chaseState;
 
         public AttackState(Unit unit, HitPoints target)
         {
-            // BUG: Units are constantly starting attackState while in combat. 
             this.unit = unit;
             Debug.Log($"{unit.name} started attacking {target.name}.");
             this.target = target;
@@ -28,45 +22,40 @@ namespace dmdspirit
         {
             if (target == null || target.IsAlive == false)
             {
+                chaseState?.StopState(false);
+                chaseState = null;
                 StopState();
                 return;
             }
 
+            if (chaseState != null) return;
+
             var targetPosition = targetRadius == null ? target.transform.position : targetRadius.GetClosestPoint(target.transform.position);
             var distance = Vector3.Distance(unit.transform.position, targetPosition);
-            if (distance > AttackRange)
+            if (distance > unit.CurrentJob.attackRange)
             {
-                // FIXME: Should know if the target is able to move.
-                if (target.CanMove)
-                {
-                    PushChaseState();
-                    // HACK: To stop instant attacks when target is pushed away little by little.
-                    if (distance > shortChase)
-                        attackTimer = 0;
-                    return;
-                }
-
-                PushMoveState(unit, targetPosition, AttackRange, targetRadius);
+                PushChaseState();
                 return;
             }
 
-            if (attackTimer <= 0)
-                Attack();
-            else
-                attackTimer -= Time.deltaTime;
-        }
-
-        private void Attack()
-        {
-            unit.DealDamage(target);
-            unit.ShootProjectile(target);
-            attackTimer = AttackCooldown;
+            if (attackTimer >= unit.CurrentJob.attackCooldown)
+            {
+                unit.ShootProjectile(target);
+                attackTimer = 0;
+            }
+            attackTimer += Time.deltaTime;
         }
 
         private void PushChaseState()
         {
-            var chaseState = new ChaseState(unit, target, AttackRange);
+            chaseState = new ChaseState(unit, target, unit.CurrentJob.attackRange);
+            chaseState.OnStateFinish += ChaseStateFinishedHandler;
             PushState(chaseState);
+        }
+
+        private void ChaseStateFinishedHandler(State state)
+        {
+            chaseState = null;
         }
     }
 }
